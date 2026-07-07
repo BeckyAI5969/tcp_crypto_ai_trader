@@ -1,58 +1,90 @@
-import pandas as pd
+import csv
 from pathlib import Path
 from datetime import datetime
 
 
 class TradeLogger:
 
-    def __init__(self, csv_path, log_path="logs/trade_log.csv"):
-        self.csv_path = csv_path
+    def __init__(self, log_path="logs/trade_history.csv"):
         self.log_path = Path(log_path)
-        self.df = None
-
-    def load_csv(self):
-        print("Loading CSV...")
-        self.df = pd.read_csv(self.csv_path)
-
-    def create_log(self):
-        print("Creating trade log...")
-
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
-        latest = self.df.iloc[-1]
+    def log_trade(
+        self,
+        symbol,
+        side,
+        entry_price,
+        exit_price,
+        quantity,
+        ai_score,
+        signal,
+        reason=""
+    ):
+        profit = self.calculate_profit(
+            side=side,
+            entry_price=entry_price,
+            exit_price=exit_price,
+            quantity=quantity
+        )
 
-        log_data = {
-            "log_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "symbol": "BTCUSDT",
-            "timeframe": "15m",
-            "close": latest["close"],
-            "AI_SCORE": latest.get("AI_SCORE", ""),
-            "AI_DECISION": latest.get("AI_DECISION", ""),
-            "AI_SIGNAL": latest.get("AI_SIGNAL", ""),
-            "StrategyScore": latest.get("StrategyScore", ""),
-            "Confidence": latest.get("Confidence", ""),
-            "Reason": latest.get("Reason", "")
+        row = {
+            "time": datetime.now().isoformat(),
+            "symbol": symbol,
+            "side": side,
+            "entry_price": entry_price,
+            "exit_price": exit_price,
+            "quantity": quantity,
+            "profit": profit,
+            "ai_score": ai_score,
+            "signal": signal,
+            "reason": reason
         }
 
-        log_df = pd.DataFrame([log_data])
+        file_exists = self.log_path.exists()
 
-        if self.log_path.exists():
-            log_df.to_csv(self.log_path, mode="a", header=False, index=False)
-        else:
-            log_df.to_csv(self.log_path, index=False)
+        with open(self.log_path, "a", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=row.keys())
 
-        print("Saved ->", self.log_path)
+            if not file_exists:
+                writer.writeheader()
 
-    def run(self):
-        self.load_csv()
-        self.create_log()
+            writer.writerow(row)
+
+        print("=" * 50)
+        print("Trade Logged")
+        print("=" * 50)
+        print(row)
+        print("=" * 50)
+
+        return row
+
+    def calculate_profit(self, side, entry_price, exit_price, quantity):
+        entry_price = float(entry_price)
+        exit_price = float(exit_price)
+        quantity = float(quantity)
+
+        if side == "BUY":
+            return round((exit_price - entry_price) * quantity, 4)
+
+        if side == "SELL":
+            return round((entry_price - exit_price) * quantity, 4)
+
+        return 0
 
 
 def main():
-    logger = TradeLogger(
-        "data/BTCUSDT/15m/BTCUSDT_15m.csv"
+    logger = TradeLogger()
+
+    logger.log_trade(
+        symbol="BTCUSDT",
+        side="BUY",
+        entry_price=63200,
+        exit_price=63500,
+        quantity=0.08,
+        ai_score=84,
+        signal="EMA bullish + RSI strong",
+        reason="Test trade logger"
     )
-    logger.run()
 
 
 if __name__ == "__main__":

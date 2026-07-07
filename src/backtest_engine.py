@@ -1,82 +1,86 @@
 import pandas as pd
+from pathlib import Path
 
 
 class BacktestEngine:
 
-    def __init__(self, csv_path, initial_cash=10000):
-        self.csv_path = csv_path
-        self.initial_cash = initial_cash
-        self.df = None
-
-    def load_csv(self):
-        print("Loading CSV...")
-        self.df = pd.read_csv(self.csv_path)
+    def __init__(self, csv_path="data/BTCUSDT/15m/BTCUSDT_15m.csv"):
+        self.csv_path = Path(csv_path)
+        self.balance = 5000
+        self.risk_per_trade = 0.01
 
     def run(self):
+        if not self.csv_path.exists():
+            print("CSV file not found.")
+            return
 
-        print("Running backtest...")
+        df = pd.read_csv(self.csv_path)
 
-        cash = self.initial_cash
-        position = 0
-
-        total_trades = 0
-        wins = 0
-
+        trades = []
+        in_position = False
         entry_price = 0
 
-        for _, row in self.df.iterrows():
+        for i in range(len(df)):
+            row = df.iloc[i]
 
-            price = row["close"]
+            price = float(row["close"])
+            decision = str(row.get("AI_DECISION", "WAIT"))
+            score = float(row.get("AI_SCORE", 0))
 
-            # ใช้ AI_SIGNAL แทน Decision
-            signal = row["AI_SIGNAL"]
-
-            if signal == "BUY" and position == 0:
-
-                position = cash / price
+            if not in_position and decision == "BUY" and score >= 70:
+                in_position = True
                 entry_price = price
-                cash = 0
 
-            elif signal == "SELL" and position > 0:
+            elif in_position:
+                profit_percent = (price - entry_price) / entry_price
 
-                cash = position * price
+                if profit_percent >= 0.02 or profit_percent <= -0.01:
+                    profit = self.balance * self.risk_per_trade * (profit_percent / 0.01)
 
-                if price > entry_price:
-                    wins += 1
+                    trades.append({
+                        "entry": entry_price,
+                        "exit": price,
+                        "profit": round(profit, 2)
+                    })
 
-                total_trades += 1
+                    in_position = False
 
-                position = 0
-                entry_price = 0
+        if not trades:
+            print("No trades found.")
+            return
 
-        if position > 0:
-            cash = position * self.df.iloc[-1]["close"]
+        result = pd.DataFrame(trades)
 
-        total_return = ((cash - self.initial_cash) / self.initial_cash) * 100
+        total_trades = len(result)
+        wins = result[result["profit"] > 0]
+        losses = result[result["profit"] < 0]
 
-        win_rate = 0
-        if total_trades > 0:
-            win_rate = wins / total_trades * 100
+        win_rate = len(wins) / total_trades * 100
+        gross_profit = wins["profit"].sum()
+        gross_loss = losses["profit"].sum()
+        net_profit = result["profit"].sum()
+        profit_factor = abs(gross_profit / gross_loss) if gross_loss != 0 else "Infinity"
 
-        print("=" * 40)
-        print("Backtest Result")
-        print("=" * 40)
-        print(f"Initial Cash : {self.initial_cash:.2f}")
-        print(f"Final Equity : {cash:.2f}")
-        print(f"Total Return : {total_return:.2f}%")
-        print(f"Total Trades : {total_trades}")
-        print(f"Win Rate     : {win_rate:.2f}%")
-        print("=" * 40)
+        result["equity"] = result["profit"].cumsum()
+        result["peak"] = result["equity"].cummax()
+        result["drawdown"] = result["equity"] - result["peak"]
+        max_drawdown = result["drawdown"].min()
+
+        print("=" * 50)
+        print("Backtest Report")
+        print("=" * 50)
+        print("Total Trades  :", total_trades)
+        print("Win Rate      :", round(win_rate, 2), "%")
+        print("Gross Profit  :", round(gross_profit, 2))
+        print("Gross Loss    :", round(gross_loss, 2))
+        print("Net Profit    :", round(net_profit, 2))
+        print("Profit Factor :", profit_factor)
+        print("Max Drawdown  :", round(max_drawdown, 2))
+        print("=" * 50)
 
 
 def main():
-
-    engine = BacktestEngine(
-        "data/BTCUSDT/15m/BTCUSDT_15m.csv",
-        initial_cash=10000
-    )
-
-    engine.load_csv()
+    engine = BacktestEngine()
     engine.run()
 
 

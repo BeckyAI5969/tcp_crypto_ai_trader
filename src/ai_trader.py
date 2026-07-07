@@ -1,38 +1,127 @@
-import subprocess
-import sys
+import pandas as pd
+from datetime import datetime
+
+from risk_manager import RiskManager
+from order_engine import OrderEngine
+from stop_loss_engine import StopLossEngine
+from take_profit_engine import TakeProfitEngine
+from position_engine import PositionEngine
+from cancel_orders_engine import CancelOrdersEngine
+from line_alert import LineAlert
 
 
 class AITrader:
 
-    def run_step(self, name, command):
-        print("=" * 50)
-        print(f"Running: {name}")
-        print("=" * 50)
-
-        result = subprocess.run(command, shell=True)
-
-        if result.returncode != 0:
-            print(f"ERROR: {name} failed")
-            sys.exit(1)
-
-        print(f"Completed: {name}")
+    def __init__(self):
+        self.csv_path = "data/BTCUSDT/15m/BTCUSDT_15m.csv"
+        self.symbol = "BTCUSDT"
+        self.balance = 5000
+        self.risk_percent = 1
+        self.min_score = 80
 
     def run(self):
-        print("TCP Crypto AI Trader Started")
+        df = pd.read_csv(self.csv_path)
+        latest = df.iloc[-1]
 
-        self.run_step("Update Data", "py src/update_engine.py")
-        self.run_step("Indicator Engine", "py src/indicator_engine.py")
-        self.run_step("Signal Engine", "py src/signal_engine.py")
-        self.run_step("Strategy Engine", "py src/strategy_engine.py")
-        self.run_step("Explain Engine", "py src/explain_engine.py")
-        self.run_step("Optimizer Engine", "py src/optimizer_engine.py")
-        self.run_step("Decision Engine", "py src/decision_engine.py")
-        self.run_step("Backtest Engine", "py src/backtest_engine.py")
-        self.run_step("Performance Engine", "py src/performance_engine.py")
+        price = float(latest["close"])
+        signal = str(latest.get("Signal", "WAIT"))
+        score = float(latest.get("AI_SCORE", 0))
 
-        print("=" * 50)
-        print("TCP Crypto AI Trader Completed")
-        print("=" * 50)
+        print("=" * 60)
+        print("TCP Crypto AI Trader")
+        print("=" * 60)
+        print("Time   :", datetime.now())
+        print("Symbol :", self.symbol)
+        print("Price  :", price)
+        print("Signal :", signal)
+        print("Score  :", score)
+        print("=" * 60)
+
+        if signal not in ["BUY", "SELL"]:
+            print("No trade. Signal is WAIT.")
+            return
+
+        if score < self.min_score:
+            print("No trade. AI score below minimum.")
+            return
+
+        PositionEngine().get_position(self.symbol)
+
+        CancelOrdersEngine().cancel_all(self.symbol)
+
+        if signal == "BUY":
+            stop_loss = round(price * 0.99, 2)
+            take_profit = round(price * 1.02, 2)
+            order_side = "BUY"
+            exit_side = "SELL"
+        else:
+            stop_loss = round(price * 1.01, 2)
+            take_profit = round(price * 0.98, 2)
+            order_side = "SELL"
+            exit_side = "BUY"
+
+        risk = RiskManager(
+            balance=self.balance,
+            risk_percent=self.risk_percent
+        )
+
+        quantity = risk.calculate_position_size(
+            entry_price=price,
+            stop_loss=stop_loss,
+            step_size=0.001
+        )
+
+        print("Stop Loss   :", stop_loss)
+        print("Take Profit :", take_profit)
+        print("Quantity    :", quantity)
+
+        order_engine = OrderEngine()
+
+        if order_side == "BUY":
+            order = order_engine.market_buy(self.symbol, quantity)
+        else:
+            order = order_engine.market_sell(self.symbol, quantity)
+
+        print("Main Order:")
+        print(order)
+
+        sl_order = StopLossEngine().place_stop_loss(
+            symbol=self.symbol,
+            side=exit_side,
+            quantity=quantity,
+            stop_price=stop_loss
+        )
+
+        print("Stop Loss Order:")
+        print(sl_order)
+
+        tp_order = TakeProfitEngine().place_take_profit(
+            symbol=self.symbol,
+            side=exit_side,
+            quantity=quantity,
+            take_profit_price=take_profit
+        )
+
+        print("Take Profit Order:")
+        print(tp_order)
+
+        message = f"""
+🤖 TCP Crypto AI Trader
+
+DEMO Order Executed
+
+Symbol: {self.symbol}
+Signal: {signal}
+AI Score: {score}
+
+Entry: {price}
+Qty: {quantity}
+
+SL: {stop_loss}
+TP: {take_profit}
+"""
+
+        LineAlert().send(message)
 
 
 def main():

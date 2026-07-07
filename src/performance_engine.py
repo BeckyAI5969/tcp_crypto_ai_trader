@@ -1,92 +1,78 @@
 import pandas as pd
+from pathlib import Path
 
 
 class PerformanceEngine:
-    def __init__(self, csv_path, initial_cash=10000):
-        self.csv_path = csv_path
-        self.initial_cash = initial_cash
-        self.df = None
 
-    def load_csv(self):
-        print("Loading CSV...")
-        self.df = pd.read_csv(self.csv_path)
+    def __init__(self, log_path="logs/trade_history.csv"):
+        self.log_path = Path(log_path)
 
-    def analyze(self):
-        print("Analyzing performance...")
+    def run(self):
+        if not self.log_path.exists():
+            print("No trade history found.")
+            return None
 
-        cash = self.initial_cash
-        position = 0
-        entry_price = 0
-        equity_curve = []
-        trades = []
+        df = pd.read_csv(self.log_path)
 
-        for _, row in self.df.iterrows():
-            price = row["close"]
-            decision = row["Decision"]
+        if df.empty:
+            print("Trade history is empty.")
+            return None
 
-            if decision == "BUY" and position == 0:
-                position = cash / price
-                entry_price = price
-                cash = 0
+        df["profit"] = pd.to_numeric(df["profit"], errors="coerce").fillna(0)
 
-            elif decision == "SELL" and position > 0:
-                cash = position * price
-                profit_pct = ((price - entry_price) / entry_price) * 100
-                trades.append(profit_pct)
-                position = 0
-                entry_price = 0
+        total_trades = len(df)
+        wins = df[df["profit"] > 0]
+        losses = df[df["profit"] < 0]
 
-            equity = cash + (position * price)
-            equity_curve.append(equity)
+        winning_trades = len(wins)
+        losing_trades = len(losses)
 
-        if position > 0:
-            cash = position * self.df.iloc[-1]["close"]
+        win_rate = (winning_trades / total_trades) * 100 if total_trades else 0
 
-        total_return = ((cash - self.initial_cash) / self.initial_cash) * 100
+        gross_profit = wins["profit"].sum()
+        gross_loss = losses["profit"].sum()
+        net_profit = df["profit"].sum()
+        average_profit = df["profit"].mean()
 
-        wins = [t for t in trades if t > 0]
-        losses = [t for t in trades if t <= 0]
+        profit_factor = abs(gross_profit / gross_loss) if gross_loss != 0 else 0
 
-        win_rate = (len(wins) / len(trades) * 100) if trades else 0
-        avg_win = sum(wins) / len(wins) if wins else 0
-        avg_loss = sum(losses) / len(losses) if losses else 0
+        df["equity"] = df["profit"].cumsum()
+        df["peak"] = df["equity"].cummax()
+        df["drawdown"] = df["equity"] - df["peak"]
+        max_drawdown = df["drawdown"].min()
 
-        gross_profit = sum(wins)
-        gross_loss = abs(sum(losses))
-        profit_factor = gross_profit / gross_loss if gross_loss else 0
+        print("=" * 50)
+        print("Performance Report")
+        print("=" * 50)
+        print("Total Trades   :", total_trades)
+        print("Winning Trades :", winning_trades)
+        print("Losing Trades  :", losing_trades)
+        print("Win Rate       :", round(win_rate, 2), "%")
+        print("Gross Profit   :", round(gross_profit, 4))
+        print("Gross Loss     :", round(gross_loss, 4))
+        print("Net Profit     :", round(net_profit, 4))
+        print("Average Profit :", round(average_profit, 4))
+        print("Profit Factor  :", round(profit_factor, 4))
+        print("Max Drawdown   :", round(max_drawdown, 4))
+        print("=" * 50)
 
-        peak = equity_curve[0] if equity_curve else self.initial_cash
-        max_drawdown = 0
-
-        for equity in equity_curve:
-            if equity > peak:
-                peak = equity
-            drawdown = ((peak - equity) / peak) * 100
-            max_drawdown = max(max_drawdown, drawdown)
-
-        print("=" * 45)
-        print("Performance Analytics")
-        print("=" * 45)
-        print(f"Initial Cash   : {self.initial_cash:.2f}")
-        print(f"Final Equity   : {cash:.2f}")
-        print(f"Total Return   : {total_return:.2f}%")
-        print(f"Total Trades   : {len(trades)}")
-        print(f"Win Rate       : {win_rate:.2f}%")
-        print(f"Average Win    : {avg_win:.2f}%")
-        print(f"Average Loss   : {avg_loss:.2f}%")
-        print(f"Profit Factor  : {profit_factor:.2f}")
-        print(f"Max Drawdown   : {max_drawdown:.2f}%")
-        print("=" * 45)
+        return {
+            "total_trades": total_trades,
+            "winning_trades": winning_trades,
+            "losing_trades": losing_trades,
+            "win_rate": round(win_rate, 2),
+            "gross_profit": round(gross_profit, 4),
+            "gross_loss": round(gross_loss, 4),
+            "net_profit": round(net_profit, 4),
+            "average_profit": round(average_profit, 4),
+            "profit_factor": round(profit_factor, 4),
+            "max_drawdown": round(max_drawdown, 4),
+        }
 
 
 def main():
-    engine = PerformanceEngine(
-        "data/BTCUSDT/15m/BTCUSDT_15m.csv",
-        initial_cash=10000
-    )
-
-    engine.load_csv()
-    engine.analyze()
+    engine = PerformanceEngine()
+    engine.run()
 
 
 if __name__ == "__main__":
