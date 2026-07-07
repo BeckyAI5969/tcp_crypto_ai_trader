@@ -1,0 +1,2 @@
+log_time,symbol,timeframe,close,AI_SCORE,AI_DECISION,AI_SIGNAL,StrategyScore,Confidence,Reason
+2026-07-07 14:19:36,BTCUSDT,15m,63084.94,30,WAIT,SELL,0,20,"EMA Bearish, Weak RSI, MACD Bearish, Low Volume"
