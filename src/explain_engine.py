@@ -3,66 +3,63 @@ import pandas as pd
 
 class ExplainEngine:
 
-    def __init__(self, csv_path):
+    def __init__(self, csv_path="data/BTCUSDT/15m/BTCUSDT_15m.csv"):
         self.csv_path = csv_path
 
-    def load_csv(self):
-        print("Loading CSV...")
-        self.df = pd.read_csv(self.csv_path)
+    def explain_latest(self):
+        df = pd.read_csv(self.csv_path)
+        latest = df.iloc[-1]
 
-    def generate(self):
-
-        print("Generating explanations...")
+        price = latest.get("close", 0)
+        score = latest.get("AI_SCORE", 0)
+        signal = latest.get("Signal", "WAIT")
 
         reasons = []
-        confidence = []
 
-        for _, row in self.df.iterrows():
+        if latest.get("EMA20", 0) > latest.get("EMA50", 0):
+            reasons.append("EMA Trend: Bullish")
+        else:
+            reasons.append("EMA Trend: Bearish")
 
-            reason = []
+        rsi = latest.get("RSI14", 0)
+        if 45 <= rsi <= 65:
+            reasons.append(f"RSI Healthy: {round(rsi, 2)}")
+        elif rsi > 70:
+            reasons.append(f"RSI Overbought: {round(rsi, 2)}")
+        else:
+            reasons.append(f"RSI Weak: {round(rsi, 2)}")
 
-            score = row["StrategyScore"]
+        if "MACD" in latest and latest.get("MACD", 0) > 0:
+            reasons.append("MACD: Bullish")
+        else:
+            reasons.append("MACD: Weak")
 
-            if row["EMA20"] > row["EMA50"]:
-                reason.append("EMA Bullish")
-            else:
-                reason.append("EMA Bearish")
+        confidence = "HIGH" if score >= 80 else "MEDIUM" if score >= 60 else "LOW"
 
-            if row["RSI14"] > 60:
-                reason.append("Strong RSI")
-            elif row["RSI14"] < 40:
-                reason.append("Weak RSI")
+        message = f"""
+==============================
+AI Explain Report
+==============================
+Symbol     : BTCUSDT
+Price      : {price}
+Signal     : {signal}
+AI Score   : {round(score, 2)}
+Confidence : {confidence}
 
-            if row["MACD"] > row["MACD_SIGNAL"]:
-                reason.append("MACD Bullish")
-            else:
-                reason.append("MACD Bearish")
+Reasons:
+- {reasons[0]}
+- {reasons[1]}
+- {reasons[2]}
+==============================
+"""
 
-            if row["volume"] > row["VOLUME_MA20"]:
-                reason.append("High Volume")
-            else:
-                reason.append("Low Volume")
-
-            reasons.append(", ".join(reason))
-            confidence.append(min(score, 100))
-
-        self.df["Reason"] = reasons
-        self.df["Confidence"] = confidence
-
-    def save(self):
-        self.df.to_csv(self.csv_path, index=False)
-        print("Saved ->", self.csv_path)
+        print(message)
+        return message
 
 
 def main():
-
-    engine = ExplainEngine(
-        "data/BTCUSDT/15m/BTCUSDT_15m.csv"
-    )
-
-    engine.load_csv()
-    engine.generate()
-    engine.save()
+    engine = ExplainEngine()
+    engine.explain_latest()
 
 
 if __name__ == "__main__":
