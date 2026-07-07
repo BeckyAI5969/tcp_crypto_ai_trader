@@ -5,6 +5,8 @@ from binance_rest_engine import BinanceRestEngine
 from indicator_engine import IndicatorEngine
 from signal_engine import SignalEngine
 from ai_trader import AITrader
+from position_engine import PositionEngine
+from line_alert import LineAlert
 
 
 class SchedulerEngine:
@@ -12,10 +14,11 @@ class SchedulerEngine:
     def __init__(self, interval_seconds=900):
         self.interval_seconds = interval_seconds
         self.csv_path = "data/BTCUSDT/15m/BTCUSDT_15m.csv"
+        self.symbol = "BTCUSDT"
 
     def run_once(self):
         print("=" * 60)
-        print("Scheduler Run")
+        print("Scheduler Run - Safe Mode")
         print("Time:", datetime.now())
         print("=" * 60)
 
@@ -30,6 +33,20 @@ class SchedulerEngine:
         signal.load_csv()
         signal.generate()
         signal.save()
+
+        current_position = PositionEngine().get_position(self.symbol)
+
+        if current_position is not None:
+            print("Safe Mode: Open position detected.")
+            print("AITrader skipped to prevent duplicate order.")
+
+            LineAlert().send(
+                "⚠️ TCP Crypto AI Trader\nSafe Mode: Open position detected.\nNew order skipped."
+            )
+            return
+
+        print("Safe Mode: No open position.")
+        print("Running AITrader...")
 
         AITrader().run()
 
