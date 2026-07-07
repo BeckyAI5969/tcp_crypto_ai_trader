@@ -1,0 +1,72 @@
+name: TCP Crypto AI Trader - Sprint 1 Data Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  security-and-smoke:
+    name: Security and Offline Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Confirm no third-party dependencies
+        run: |
+          if [ -s requirements.txt ] && grep -v '^#' requirements.txt | grep -q '[A-Za-z0-9]'; then
+            echo "requirements.txt contains dependencies. Sprint 1 requires standard library only."
+            exit 1
+          fi
+          echo "Dependency gate passed."
+
+      - name: Reject unsafe executable files
+        run: |
+          if find . -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.bat" -o -name "*.ps1" -o -name "*.pyc" \) | grep -q .; then
+            echo "Unsafe or generated file found."
+            find . -type f \( -name "*.exe" -o -name "*.dll" -o -name "*.bat" -o -name "*.ps1" -o -name "*.pyc" \)
+            exit 1
+          fi
+          echo "File safety gate passed."
+
+      - name: Python syntax check
+        run: python -m compileall src tests
+
+      - name: Offline smoke test
+        run: python tests/smoke_test.py
+
+  sprint1-data-gate:
+    name: Download and Validate Public Market Data
+    runs-on: ubuntu-latest
+    needs: security-and-smoke
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Sprint 1 Data Gate
+        run: python -m src.data_gate
+
+      - name: Upload Sprint 1 report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tcp-crypto-ai-sprint1-report
+          path: |
+            reports/data_quality_report.md
+            reports/data_quality_report.json
