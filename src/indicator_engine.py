@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
@@ -5,8 +6,8 @@ from ta.volatility import AverageTrueRange, BollingerBands
 
 
 class IndicatorEngine:
-    def __init__(self, csv_path):
-        self.csv_path = csv_path
+    def __init__(self, csv_path: str):
+        self.csv_path = Path(csv_path)
         self.df = None
 
     def load_csv(self):
@@ -17,38 +18,37 @@ class IndicatorEngine:
             self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
 
     def calculate(self):
-        print("Calculating EMA...")
+        print("Calculating indicators...")
+
         self.df["EMA20"] = EMAIndicator(self.df["close"], window=20).ema_indicator()
         self.df["EMA50"] = EMAIndicator(self.df["close"], window=50).ema_indicator()
         self.df["EMA200"] = EMAIndicator(self.df["close"], window=200).ema_indicator()
 
-        print("Calculating RSI...")
         self.df["RSI14"] = RSIIndicator(self.df["close"], window=14).rsi()
 
-        print("Calculating MACD...")
         macd = MACD(self.df["close"])
         self.df["MACD"] = macd.macd()
         self.df["MACD_SIGNAL"] = macd.macd_signal()
         self.df["MACD_HIST"] = macd.macd_diff()
 
-        print("Calculating ATR...")
         atr = AverageTrueRange(
             high=self.df["high"],
             low=self.df["low"],
-            close=self.df["close"]
+            close=self.df["close"],
+            window=14
         )
         self.df["ATR14"] = atr.average_true_range()
 
-        print("Calculating Bollinger Bands...")
-        bb = BollingerBands(self.df["close"])
+        bb = BollingerBands(self.df["close"], window=20)
         self.df["BB_UPPER"] = bb.bollinger_hband()
         self.df["BB_MIDDLE"] = bb.bollinger_mavg()
         self.df["BB_LOWER"] = bb.bollinger_lband()
 
+        self.df["VOLUME_MA20"] = self.df["volume"].rolling(window=20).mean()
+
     def save(self):
         self.df.to_csv(self.csv_path, index=False)
-        print("Saved")
-        print(self.csv_path)
+        print("Saved ->", self.csv_path)
 
 
 def main():
