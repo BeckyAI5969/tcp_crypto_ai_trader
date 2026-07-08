@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 from pathlib import Path
-from line_alert import LineAlert
+from src.line_alert import LineAlert
 
 
 class AlertEngine:

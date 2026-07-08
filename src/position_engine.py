@@ -1,4 +1,4 @@
-from futures_testnet_client import FuturesTestnetClient
+from src.futures_testnet_client import FuturesTestnetClient
 
 
 class PositionEngine:
@@ -7,8 +7,6 @@ class PositionEngine:
         self.client = FuturesTestnetClient().client
 
     def get_position(self, symbol="BTCUSDT"):
-        from pprint import pprint
-
         positions = self.client.futures_position_information(symbol=symbol)
         print(positions)
 
@@ -28,7 +26,6 @@ class PositionEngine:
                 print("Entry Price  :", position["entryPrice"])
                 print("Mark Price   :", position["markPrice"])
                 print("UnrealizedPNL:", position["unRealizedProfit"])
-                # print("Leverage :", position["leverage"])
                 print("=" * 50)
 
                 return position

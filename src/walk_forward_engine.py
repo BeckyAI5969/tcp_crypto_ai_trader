@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 
-from optimizer_engine import OptimizerEngine
+from src.optimizer_engine import OptimizerEngine
 
 
 class WalkForwardEngine:

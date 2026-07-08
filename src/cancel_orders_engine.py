@@ -1,4 +1,4 @@
-from futures_testnet_client import FuturesTestnetClient
+from src.futures_testnet_client import FuturesTestnetClient
 
 
 class CancelOrdersEngine:

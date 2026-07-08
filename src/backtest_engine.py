@@ -8,6 +8,8 @@ class BacktestEngine:
         self.csv_path = Path(csv_path)
         self.balance = 5000
         self.risk_per_trade = 0.01
+        self.take_profit_pct = 0.03
+        self.stop_loss_pct = -0.015
 
     def run(self):
         if not self.csv_path.exists():
@@ -15,7 +17,6 @@ class BacktestEngine:
             return
 
         df = pd.read_csv(self.csv_path)
-
         trades = []
         in_position = False
         entry_price = 0
@@ -24,18 +25,29 @@ class BacktestEngine:
             row = df.iloc[i]
 
             price = float(row["close"])
-            decision = str(row.get("AI_DECISION", "WAIT"))
+            signal = str(row.get("Signal", "WAIT"))
             score = float(row.get("AI_SCORE", 0))
 
-            if not in_position and decision == "BUY" and score >= 70:
+            if (
+                not in_position
+                and signal == "BUY"
+                and score >= 85
+            ):
                 in_position = True
                 entry_price = price
 
             elif in_position:
-                profit_percent = (price - entry_price) / entry_price
+                profit_pct = (price - entry_price) / entry_price
 
-                if profit_percent >= 0.02 or profit_percent <= -0.01:
-                    profit = self.balance * self.risk_per_trade * (profit_percent / 0.01)
+                if (
+                    profit_pct >= self.take_profit_pct
+                    or profit_pct <= self.stop_loss_pct
+                ):
+                    profit = (
+                        self.balance
+                        * self.risk_per_trade
+                        * (profit_pct / abs(self.stop_loss_pct))
+                    )
 
                     trades.append({
                         "entry": entry_price,

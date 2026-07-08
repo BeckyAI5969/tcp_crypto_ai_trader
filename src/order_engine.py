@@ -1,6 +1,6 @@
-from futures_testnet_client import FuturesTestnetClient
+from src.futures_testnet_client import FuturesTestnetClient
 
-from risk_manager import RiskManager
+from src.risk_manager import RiskManager
 class OrderEngine:
 
     def __init__(self):
@@ -25,7 +25,7 @@ class OrderEngine:
         return result
 
 
-from risk_manager import RiskManager
+from src.risk_manager import RiskManager
 
 
 def main():

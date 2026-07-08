@@ -1,20 +1,20 @@
 import pandas as pd
 from datetime import datetime
 
-from risk_manager import RiskManager
-from order_engine import OrderEngine
-from stop_loss_engine import StopLossEngine
-from take_profit_engine import TakeProfitEngine
-from position_engine import PositionEngine
-from cancel_orders_engine import CancelOrdersEngine
-from line_alert import LineAlert
+from src.risk_manager import RiskManager
+from src.order_engine import OrderEngine
+from src.stop_loss_engine import StopLossEngine
+from src.take_profit_engine import TakeProfitEngine
+from src.position_engine import PositionEngine
+from src.cancel_orders_engine import CancelOrdersEngine
+from src.line_alert import LineAlert
 
 
 class AITrader:
 
-    def __init__(self):
-        self.csv_path = "data/BTCUSDT/15m/BTCUSDT_15m.csv"
-        self.symbol = "BTCUSDT"
+    def __init__(self, symbol="BTCUSDT"):
+        self.symbol = symbol
+        self.csv_path = f"data/{symbol}/15m/{symbol}_15m.csv"
         self.balance = 5000
         self.risk_percent = 1
         self.min_score = 80
@@ -46,7 +46,6 @@ class AITrader:
             return
 
         PositionEngine().get_position(self.symbol)
-
         CancelOrdersEngine().cancel_all(self.symbol)
 
         if signal == "BUY":
@@ -60,10 +59,7 @@ class AITrader:
             order_side = "SELL"
             exit_side = "BUY"
 
-        risk = RiskManager(
-            balance=self.balance,
-            risk_percent=self.risk_percent
-        )
+        risk = RiskManager(balance=self.balance, risk_percent=self.risk_percent)
 
         quantity = risk.calculate_position_size(
             entry_price=price,
