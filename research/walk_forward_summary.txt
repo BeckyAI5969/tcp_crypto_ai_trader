@@ -1,0 +1,38 @@
+
+======================================================================
+TCP WALK-FORWARD QUANT LAB SUMMARY
+======================================================================
+
+Generated At : 2026-07-09 01:44:27.833964
+
+Report       : research\walk_forward_report.csv
+Strategy     : research\best_strategy_verified.json
+
+Best Strategy
+{
+    "created_at": "2026-07-09T01:44:27.832896",
+    "strategy_name": "TCP_WALK_FORWARD_VERIFIED_V1",
+    "symbol": "BNBUSDT",
+    "timeframe": "15m",
+    "min_score": 60,
+    "take_profit_pct": 0.04,
+    "stop_loss_pct": -0.02,
+    "trend_filter": true,
+    "rsi_filter": false,
+    "test_trades": 27,
+    "test_win_rate": 33.33,
+    "test_net_profit": -52.24,
+    "test_profit_factor": 0.9477,
+    "test_max_drawdown": -244.46,
+    "passed": false
+}
+
+Top Results
+ trades  wins  losses  win_rate  gross_profit  gross_loss  net_profit  profit_factor  profit_factor_score  max_drawdown  expectancy  symbol phase  min_score  take_profit_pct  stop_loss_pct  trend_filter  rsi_filter  train_profit_factor  train_net_profit  train_win_rate                       time  passed
+     27     9      18     33.33        946.96     -999.20      -52.24         0.9477             0.947717       -244.46       -1.93 BNBUSDT  TEST         60             0.04          -0.02          True       False               1.2306            722.29           38.89 2026-07-09T01:44:27.818944   False
+    165    55     110     33.33       6338.45    -6825.91     -487.46         0.9286             0.928586      -1261.90       -2.95 SOLUSDT  TEST         60             0.02          -0.01         False       False               1.0413            881.33           36.94 2026-07-09T01:38:20.387776   False
+     86    27      59     31.40       3001.05    -3487.79     -486.74         0.8604             0.860444       -984.54       -5.66 BTCUSDT  TEST         60             0.02          -0.01         False        True               1.0115            100.55           35.75 2026-07-09T01:32:24.498550   False
+     39    12      27     30.77       1277.58    -1488.23     -210.65         0.8585             0.858459       -502.46       -5.40 ETHUSDT  TEST         60             0.04          -0.02          True        True               1.1508            642.20           37.93 2026-07-09T01:35:23.106321   False
+     40    10      30     25.00       1106.45    -1608.79     -502.34         0.6878             0.687755       -516.28      -12.56 XRPUSDT  TEST         60             0.04          -0.02          True       False               1.0151             74.58           34.35 2026-07-09T01:41:27.508614   False
+
+======================================================================

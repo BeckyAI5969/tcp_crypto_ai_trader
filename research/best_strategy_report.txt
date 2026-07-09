@@ -1,0 +1,44 @@
+
+======================================================================
+TCP AI FEATURE IMPORTANCE REPORT
+======================================================================
+
+Dataset        : research\market_dataset.csv
+Rows           : 173845
+Features Tested: 11
+
+Top Features
+           feature  active_rows  active_return_16  inactive_return_16  edge_score  buy_edge_rate
+    rsi_overbought        15383          0.019084           -0.023028    0.042113          26.97
+    macd_gt_signal        87256         -0.008130           -0.030560    0.022430          26.16
+macd_hist_positive        87256         -0.008130           -0.030560    0.022430          26.16
+    ema20_gt_ema50        85493         -0.008664           -0.029595    0.020931          25.13
+      rsi_oversold        16526         -0.004038           -0.020905    0.016867          31.52
+    volume_gt_ma20        62845         -0.010893           -0.024063    0.013170          28.02
+   ema50_gt_ema200        83881         -0.016477           -0.021935    0.005458          25.72
+   price_gt_ema200        83291         -0.016527           -0.021854    0.005327          25.44
+       rsi_neutral       141936         -0.025239            0.007109   -0.032348          25.84
+
+Best Strategy
+{
+    "created_at": "2026-07-09T01:21:11.898803",
+    "strategy_name": "TCP_AI_FEATURE_SELECTED_V1",
+    "timeframe": "15m",
+    "target": "future_return_16",
+    "top_features": [
+        "rsi_overbought",
+        "macd_gt_signal",
+        "macd_hist_positive",
+        "ema20_gt_ema50",
+        "rsi_oversold"
+    ],
+    "logic": "BUY when majority of top features are active",
+    "minimum_active_features": 2
+}
+
+Files
+Feature CSV    : research\feature_importance.csv
+Strategy JSON  : research\best_strategy.json
+Report TXT     : research\best_strategy_report.txt
+
+======================================================================

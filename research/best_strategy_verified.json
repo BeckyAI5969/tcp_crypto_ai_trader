@@ -1,0 +1,17 @@
+{
+    "created_at": "2026-07-09T01:44:27.832896",
+    "strategy_name": "TCP_WALK_FORWARD_VERIFIED_V1",
+    "symbol": "BNBUSDT",
+    "timeframe": "15m",
+    "min_score": 60,
+    "take_profit_pct": 0.04,
+    "stop_loss_pct": -0.02,
+    "trend_filter": true,
+    "rsi_filter": false,
+    "test_trades": 27,
+    "test_win_rate": 33.33,
+    "test_net_profit": -52.24,
+    "test_profit_factor": 0.9477,
+    "test_max_drawdown": -244.46,
+    "passed": false
+}

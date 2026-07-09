@@ -1,0 +1,20 @@
+{
+    "created_at": "2026-07-09T13:54:52.417129",
+    "strategy_name": "TCP_OPTIMIZATION_LAB_V3_FAST",
+    "symbol": "ETHUSDT",
+    "timeframe": "15m",
+    "min_score": 85,
+    "take_profit_pct": 0.05,
+    "stop_loss_pct": -0.015,
+    "rsi_range": "(35, 70)",
+    "ema_filter": "ema20_gt_ema50_and_ema50_gt_ema200",
+    "atr_filter": true,
+    "volume_filter": true,
+    "breakout_filter": false,
+    "trades": 117,
+    "win_rate": 30.77,
+    "net_profit": 1533.84,
+    "profit_factor": "1.3091",
+    "max_drawdown": -679.42,
+    "expectancy": 13.11
+}

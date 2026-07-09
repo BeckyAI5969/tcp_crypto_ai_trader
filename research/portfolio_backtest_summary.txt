@@ -1,0 +1,27 @@
+
+============================================================
+TCP PORTFOLIO BACKTEST REPORT
+============================================================
+
+Symbols Tested     : 5
+Total Trades       : 453
+Total Wins         : 342
+Total Losses       : 111
+
+Gross Profit       : 8764.54
+Gross Loss         : -6307.92
+Net Profit         : 2456.62
+
+Portfolio PF       : 1.3895
+Portfolio Win Rate : 75.5%
+Portfolio DD Sum   : -1443.23
+Expectancy         : 5.42
+
+Best Symbol by PF  : BNBUSDT
+Best Symbol Profit : ETHUSDT
+
+Files
+CSV Report         : research\portfolio_backtest_report.csv
+Summary            : research\portfolio_backtest_summary.txt
+
+============================================================

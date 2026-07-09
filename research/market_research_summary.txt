@@ -1,0 +1,44 @@
+
+======================================================================
+TCP MARKET RESEARCH LAB SUMMARY
+======================================================================
+
+Generated At     : 2026-07-09 01:13:15.408692
+Symbols Tested   : 5
+Total Rows       : 173845
+Timeframe        : 15m
+
+Backtest Period
+Start Date       : 2025-07-11 05:15:00
+End Date         : 2026-07-08 09:15:00
+
+Forward Labels
+Return 4 Bars    : future_return_4
+Return 8 Bars    : future_return_8
+Return 16 Bars   : future_return_16
+Return 32 Bars   : future_return_32
+
+Label Rule
+BUY_EDGE         : future_return_16 >= +0.5%
+SELL_EDGE        : future_return_16 <= -0.5%
+NEUTRAL          : between -0.5% and +0.5%
+
+Label Counts
+{'NEUTRAL': 80638, 'SELL_EDGE': 47179, 'BUY_EDGE': 46028}
+
+Feature Average Future Return 16 Bars
+- ema20_gt_ema50: {0: -0.029595173691607548, 1: -0.008664282589150862}
+- ema50_gt_ema200: {0: -0.02193542132718334, 1: -0.016477272005775596}
+- price_gt_ema200: {0: -0.021854299000553856, 1: -0.01652680488527009}
+- macd_gt_signal: {0: -0.030559936313564948, 1: -0.008129801640459216}
+- macd_hist_positive: {0: -0.030559936313564948, 1: -0.008129801640459216}
+- volume_gt_ma20: {0: -0.024062699647782574, 1: -0.010892968995008653}
+- rsi_oversold: {0: -0.020905223728497294, 1: -0.004038448847374995}
+- rsi_neutral: {0: 0.007108839249891739, 1: -0.02523929270248549}
+- rsi_overbought: {0: -0.023028256961742877, 1: 0.019084402085192395}
+
+Files
+Dataset          : research\market_dataset.csv
+Summary          : research\market_research_summary.txt
+
+======================================================================

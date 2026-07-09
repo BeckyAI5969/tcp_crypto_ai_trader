@@ -1,0 +1,20 @@
+{
+    "created_at": "2026-07-09T15:34:31.389771",
+    "strategy_name": "TCP_FINAL_OPTIMIZATION_V4",
+    "symbol": "ETHUSDT",
+    "timeframe": "15m",
+    "min_score": 60,
+    "rsi_range": "(30, 60)",
+    "atr_mode": "sma20",
+    "volume_multiplier": 1.1,
+    "ema_confirm": true,
+    "exit_mode": "ema20_exit",
+    "take_profit_pct": 0.04,
+    "stop_loss_pct": -0.02,
+    "trades": 121,
+    "win_rate": 76.03,
+    "net_profit": 910.77,
+    "profit_factor": "1.5405",
+    "max_drawdown": -365.91,
+    "expectancy": 7.53
+}

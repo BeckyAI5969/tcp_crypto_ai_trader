@@ -1,0 +1,56 @@
+
+============================================================
+TCP FINAL TRADE ANALYSIS
+============================================================
+
+Strategy
+{
+    "created_at": "2026-07-09T13:05:43.057591",
+    "strategy_name": "TCP_OPTIMIZATION_LAB_V2_FAST",
+    "symbol": "BNBUSDT",
+    "timeframe": "15m",
+    "min_score": 60,
+    "take_profit_pct": 0.04,
+    "stop_loss_pct": -0.02,
+    "rsi_range": "None",
+    "ema_filter": "ema50_gt_ema200",
+    "atr_filter": false,
+    "volume_filter": true,
+    "trades": 113,
+    "win_rate": 39.82,
+    "net_profit": 1056.49,
+    "profit_factor": "1.2774",
+    "max_drawdown": -796.26,
+    "expectancy": 9.35
+}
+
+Performance
+Total Trades     : 113
+Wins             : 45
+Losses           : 68
+Win Rate         : 39.82%
+Gross Profit     : 4865.21
+Gross Loss       : -3808.72
+Net Profit       : 1056.49
+Profit Factor    : 1.2774
+Average Win      : 108.12
+Average Loss     : -56.01
+Avg Holding Bars : 179.77
+
+Loss Analysis
+loss_reason
+LOW_VOLATILITY    28
+FALSE_SIGNAL      21
+RSI_TOO_HIGH      19
+
+Recommendation
+- If LOW_VOLUME is high: keep or strengthen volume filter.
+- If FALSE_SIGNAL is high: add confirmation before entry.
+- If RSI_TOO_HIGH is high: reduce RSI upper range.
+- If LOW_VOLATILITY is high: keep ATR filter.
+
+Files
+Trade Analysis : research\final_trade_analysis.csv
+Summary        : research\final_trade_analysis_summary.txt
+
+============================================================
