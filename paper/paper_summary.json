@@ -1,0 +1,16 @@
+{
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0,
+    "gross_profit": 0,
+    "gross_loss": 0,
+    "net_profit": 0,
+    "profit_factor": 0,
+    "max_drawdown": 0,
+    "max_drawdown_pct": 0,
+    "sharpe_ratio": 0,
+    "sortino_ratio": 0,
+    "recovery_factor": 0,
+    "expectancy": 0
+}
