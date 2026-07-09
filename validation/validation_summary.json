@@ -1,0 +1,21 @@
+{
+    "score": 100.0,
+    "passed": 6,
+    "total": 6,
+    "result": {
+        "data_integrity": true,
+        "strategy_integrity": true,
+        "portfolio_integrity": true,
+        "paper_integrity": true,
+        "report_integrity": true,
+        "regression_integrity": true
+    },
+    "issues": [
+        {
+            "module": "regression_integrity",
+            "severity": "LOW",
+            "type": "WARNING",
+            "message": "Paper Trading ยังไม่มี Closed Trades"
+        }
+    ]
+}
