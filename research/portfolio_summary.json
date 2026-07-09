@@ -1,0 +1,19 @@
+{
+    "total_trades": 5,
+    "wins": 5,
+    "losses": 0,
+    "win_rate": 100.0,
+    "gross_profit": 2456.62,
+    "gross_loss": 0.0,
+    "net_profit": 2456.62,
+    "profit_factor": 999999.0,
+    "max_drawdown": 0.0,
+    "max_drawdown_pct": 0.0,
+    "sharpe_ratio": 23.3876,
+    "sortino_ratio": NaN,
+    "recovery_factor": 0.0,
+    "expectancy": 491.32,
+    "symbols": 5,
+    "best_symbol": "ETHUSDT",
+    "worst_symbol": "BTCUSDT"
+}
