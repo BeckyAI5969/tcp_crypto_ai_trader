@@ -1,11 +1,4 @@
-# ==========================================
-# TCP Crypto AI Trader
-# ==========================================
-
-# Environment variables
-.env
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -16,17 +9,29 @@ __pycache__/
 venv/
 env/
 
-# VS Code
+# IDE
 .vscode/
+.idea/
 
 # Logs
 logs/
 *.log
 
-# Data (ถ้าเป็นไฟล์ที่สร้างอัตโนมัติ)
-data/**/*.csv
+# Data
+data/
+research/*.csv
+research/*.parquet
 
-# OS Files
+# Reports
+paper/*.csv
+paper/*.json
+paper/*.jsonl
+
+# Local config
+config/api_config.json
+
+# OS
 .DS_Store
 Thumbs.db
-config/api_config.json
+.env
+.env.*
