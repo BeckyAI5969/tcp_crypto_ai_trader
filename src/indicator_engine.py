@@ -6,8 +6,9 @@ from ta.volatility import AverageTrueRange, BollingerBands
 
 
 class IndicatorEngine:
-    def __init__(self, csv_path: str):
-        self.csv_path = Path(csv_path)
+
+    def __init__(self, csv_path=None):
+        self.csv_path = Path(csv_path) if csv_path else None
         self.df = None
 
     def load_csv(self):
@@ -35,7 +36,7 @@ class IndicatorEngine:
             high=self.df["high"],
             low=self.df["low"],
             close=self.df["close"],
-            window=14
+            window=14,
         )
         self.df["ATR14"] = atr.average_true_range()
 
@@ -46,9 +47,19 @@ class IndicatorEngine:
 
         self.df["VOLUME_MA20"] = self.df["volume"].rolling(window=20).mean()
 
+    def calculate_dataframe(self, df):
+        self.df = df.copy()
+
+        for col in ["open", "high", "low", "close", "volume"]:
+            self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
+
+        self.calculate()
+        return self.df
+
     def save(self):
-        self.df.to_csv(self.csv_path, index=False)
-        print("Saved ->", self.csv_path)
+        if self.csv_path:
+            self.df.to_csv(self.csv_path, index=False)
+            print("Saved ->", self.csv_path)
 
 
 def main():

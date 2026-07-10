@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.paper_order import PaperOrder
 from src.paper_position import PaperPosition
 
@@ -5,67 +7,62 @@ from src.paper_position import PaperPosition
 class PaperExecutionEngine:
 
     def __init__(self):
-        self.orders = []
-        self.positions = []
+        self.order_counter = 0
 
-    def execute_order(
+    def create_order(
         self,
         symbol,
-        side,
-        quantity,
+        signal,
         price,
+        quantity,
+        score,
     ):
 
+        side = "BUY" if signal == "BUY" else "SELL"
+
+        self.order_counter += 1
+
         order = PaperOrder(
+            order_id=f"PAPER-{self.order_counter:08d}",
             symbol=symbol,
             side=side,
-            quantity=quantity,
+            signal=signal,
             price=price,
+            quantity=quantity,
+            strategy_score=score,
+            created_time=datetime.now(),
         )
 
-        order.execute()
+        return order
 
-        self.orders.append(order)
+    def execute(self, order: PaperOrder):
+
+        order.fill(
+            order.price,
+            datetime.now(),
+        )
 
         position = PaperPosition(
-            symbol=symbol,
-            side=side,
-            quantity=quantity,
-            entry_price=price,
+            symbol=order.symbol,
+            side=order.side,
+            entry_price=order.filled_price,
+            quantity=order.quantity,
+            entry_time=order.filled_time,
+            strategy_score=order.strategy_score,
+            signal=order.signal,
         )
-
-        self.positions.append(position)
 
         return position
 
-    def open_positions(self):
-
-        return [
-            p
-            for p in self.positions
-            if p.status == "OPEN"
-        ]
-
     def close_position(
         self,
-        position,
-        exit_price,
+        position: PaperPosition,
+        exit_price: float,
     ):
 
-        pnl = position.close(exit_price)
+        position.close(
+            exit_price,
+            datetime.now(),
+        )
 
-        return pnl
-
-    def order_history(self):
-
-        return [
-            o.to_dict()
-            for o in self.orders
-        ]
-
-    def position_history(self):
-
-        return [
-            p.to_dict()
-            for p in self.positions
-        ]
+        return position

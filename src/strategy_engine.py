@@ -2,7 +2,8 @@ import pandas as pd
 
 
 class StrategyEngine:
-    def __init__(self, csv_path):
+
+    def __init__(self, csv_path=None):
         self.csv_path = csv_path
         self.df = None
 
@@ -25,9 +26,15 @@ class StrategyEngine:
         self.df.loc[self.df["StrategyScore"] >= 70, "Decision"] = "BUY"
         self.df.loc[self.df["StrategyScore"] <= 30, "Decision"] = "SELL"
 
+    def calculate_dataframe(self, df):
+        self.df = df.copy()
+        self.calculate_score()
+        return self.df
+
     def save(self):
-        self.df.to_csv(self.csv_path, index=False)
-        print("Saved ->", self.csv_path)
+        if self.csv_path:
+            self.df.to_csv(self.csv_path, index=False)
+            print("Saved ->", self.csv_path)
 
 
 def main():

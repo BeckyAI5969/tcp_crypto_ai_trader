@@ -29,3 +29,4 @@ data/**/*.csv
 # OS Files
 .DS_Store
 Thumbs.db
+config/api_config.json

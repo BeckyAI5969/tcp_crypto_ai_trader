@@ -1,81 +1,69 @@
 import json
 from pathlib import Path
-
-import pandas as pd
-
-from src.portfolio_metrics import PortfolioMetrics
+from datetime import datetime
 
 
 class PaperReport:
 
     def __init__(self):
-        self.output_dir = Path("paper")
-        self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def generate(
+        self.report_dir = Path("logs")
+        self.report_dir.mkdir(exist_ok=True)
+
+        self.report_file = (
+            self.report_dir / "paper_summary.json"
+        )
+
+    def save(
         self,
-        orders,
-        positions,
-        equity_history,
+        portfolio,
+        trade_logger,
     ):
 
-        orders_df = pd.DataFrame(orders)
-        positions_df = pd.DataFrame(positions)
-        equity_df = pd.DataFrame(equity_history)
+        summary = portfolio.summary()
 
-        closed_positions = positions_df[
-            positions_df["status"] == "CLOSED"
-        ].copy()
+        report = {
 
-        if closed_positions.empty:
-            trades_df = pd.DataFrame(
-                columns=["profit"]
-            )
-        else:
-            trades_df = closed_positions.rename(
-                columns={
-                    "realized_pnl": "profit"
-                }
-            )
+            "generated_at":
+                datetime.now().isoformat(),
 
-        summary = PortfolioMetrics.summarize(
-            trades_df,
-            equity_df
-        )
+            "mode":
+                "PAPER",
 
-        orders_df.to_csv(
-            self.output_dir / "paper_orders.csv",
-            index=False,
-        )
+            "total_trades":
+                trade_logger.total_trades(),
 
-        positions_df.to_csv(
-            self.output_dir / "paper_positions.csv",
-            index=False,
-        )
+            "open_positions":
+                summary["open_positions"],
 
-        equity_df.to_csv(
-            self.output_dir / "paper_equity.csv",
-            index=False,
-        )
+            "closed_positions":
+                summary["closed_positions"],
+
+            "realized_pnl":
+                summary["realized_pnl"],
+
+            "unrealized_pnl":
+                summary["unrealized_pnl"],
+
+            "equity":
+                summary["equity"],
+
+            "status":
+                "RUNNING",
+
+        }
 
         with open(
-            self.output_dir / "paper_summary.json",
+            self.report_file,
             "w",
             encoding="utf-8",
         ) as f:
+
             json.dump(
-                summary,
+                report,
                 f,
                 indent=4,
+                ensure_ascii=False,
             )
 
-        print("=" * 70)
-        print("TCP PAPER TRADING REPORT")
-        print("=" * 70)
-
-        for k, v in summary.items():
-            print(f"{k:25s}: {v}")
-
-        print("=" * 70)
-        print("Saved ->", self.output_dir)
-        print("=" * 70)
+        return report

@@ -1,107 +1,89 @@
-from datetime import datetime
-from pathlib import Path
-
-import pandas as pd
-
-from config.symbols import SYMBOLS
 from src.paper_execution import PaperExecutionEngine
 from src.paper_portfolio import PaperPortfolio
+from src.paper_trade_log import PaperTradeLogger
 from src.paper_report import PaperReport
 
 
 class PaperTrader:
 
     def __init__(self):
-        self.initial_capital = 100000
-        self.capital_per_trade_pct = 0.10
 
         self.execution = PaperExecutionEngine()
-        self.portfolio = PaperPortfolio(
-            initial_capital=self.initial_capital
+
+        self.portfolio = PaperPortfolio()
+
+        self.logger = PaperTradeLogger()
+
+        self.report = PaperReport()
+
+        self.default_quantity = 1.0
+
+    def on_signal(
+        self,
+        symbol,
+        signal,
+        price,
+        score,
+    ):
+
+        if signal == "WAIT":
+            return None
+
+        order = self.execution.create_order(
+            symbol=symbol,
+            signal=signal,
+            price=price,
+            quantity=self.default_quantity,
+            score=score,
         )
 
-        self.data_folder = Path("data")
+        position = self.execution.execute(order)
 
-    def run_once(self):
-        print("=" * 70)
-        print("TCP PAPER TRADER")
-        print("=" * 70)
+        self.portfolio.add_position(position)
 
-        for symbol in SYMBOLS:
-            csv_path = self.data_folder / symbol / "15m" / f"{symbol}_15m.csv"
+        self.logger.save_trade(position)
 
-            if not csv_path.exists():
-                print(symbol, "CSV not found -> skipped")
-                continue
-
-            df = pd.read_csv(csv_path)
-
-            if df.empty:
-                print(symbol, "CSV empty -> skipped")
-                continue
-
-            latest = df.iloc[-1]
-
-            price = float(latest["close"])
-            signal = str(latest.get("Signal", "WAIT"))
-            score = float(latest.get("AI_SCORE", 0))
-
-            print(symbol, "Signal:", signal, "Score:", score, "Price:", price)
-
-            if signal != "BUY":
-                continue
-
-            if score < 80:
-                continue
-
-            capital_required = self.initial_capital * self.capital_per_trade_pct
-            quantity = round(capital_required / price, 6)
-
-            if not self.portfolio.open_position(capital_required):
-                print(symbol, "Not enough cash")
-                continue
-
-            position = self.execution.execute_order(
-                symbol=symbol,
-                side="BUY",
-                quantity=quantity,
-                price=price,
-            )
-
-            print("Paper position opened:", position.to_dict(price))
-
-        unrealized = 0.0
-
-        for position in self.execution.open_positions():
-            csv_path = self.data_folder / position.symbol / "15m" / f"{position.symbol}_15m.csv"
-            df = pd.read_csv(csv_path)
-            current_price = float(df.iloc[-1]["close"])
-
-            unrealized += position.unrealized_pnl(current_price)
-
-        self.portfolio.record(
-            timestamp=datetime.utcnow().isoformat(),
-            unrealized_pnl=unrealized,
-            open_positions=len(self.execution.open_positions()),
+        self.report.save(
+            self.portfolio,
+            self.logger,
         )
 
-        PaperReport().generate(
-            orders=self.execution.order_history(),
-            positions=[
-                p.to_dict()
-                for p in self.execution.positions
-            ],
-            equity_history=self.portfolio.history(),
+        return position
+
+    def update_market_price(
+        self,
+        symbol,
+        price,
+    ):
+
+        self.portfolio.update_market_price(
+            symbol,
+            price,
         )
 
-        print("=" * 70)
-        print("SPRINT 10 COMPLETED")
-        print("=" * 70)
+        self.report.save(
+            self.portfolio,
+            self.logger,
+        )
 
+    def close_position(
+        self,
+        position,
+        exit_price,
+    ):
 
-def main():
-    PaperTrader().run_once()
+        self.execution.close_position(
+            position,
+            exit_price,
+        )
 
+        self.logger.save_trade(position)
 
-if __name__ == "__main__":
-    main()
+        self.report.save(
+            self.portfolio,
+            self.logger,
+        )
+
+    def summary(self):
+
+        return self.portfolio.summary()

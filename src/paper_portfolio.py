@@ -1,37 +1,95 @@
+from src.paper_position import PaperPosition
+
+
 class PaperPortfolio:
 
-    def __init__(self, initial_capital=100000):
-        self.initial_capital = float(initial_capital)
-        self.cash = float(initial_capital)
-        self.realized_pnl = 0.0
-        self.equity_history = []
+    def __init__(self):
 
-    def can_open(self, capital_required):
-        return self.cash >= capital_required
+        self.positions = []
 
-    def open_position(self, capital_required):
-        if not self.can_open(capital_required):
-            return False
+    def add_position(self, position: PaperPosition):
 
-        self.cash -= capital_required
-        return True
+        self.positions.append(position)
 
-    def close_position(self, capital_used, pnl):
-        self.cash += capital_used + pnl
-        self.realized_pnl += pnl
+    def get_open_positions(self):
 
-    def equity(self, unrealized_pnl=0.0):
-        return self.cash + unrealized_pnl
+        return [
+            p
+            for p in self.positions
+            if p.is_open()
+        ]
 
-    def record(self, timestamp, unrealized_pnl=0.0, open_positions=0):
-        self.equity_history.append({
-            "time": timestamp,
-            "cash": round(self.cash, 2),
-            "realized_pnl": round(self.realized_pnl, 2),
-            "unrealized_pnl": round(unrealized_pnl, 2),
-            "equity": round(self.equity(unrealized_pnl), 2),
-            "open_positions": open_positions,
-        })
+    def get_closed_positions(self):
 
-    def history(self):
-        return self.equity_history
+        return [
+            p
+            for p in self.positions
+            if not p.is_open()
+        ]
+
+    def update_market_price(
+        self,
+        symbol,
+        price,
+    ):
+
+        for p in self.get_open_positions():
+
+            if p.symbol == symbol:
+
+                p.update_price(price)
+
+    def total_unrealized_pnl(self):
+
+        return round(
+
+            sum(
+                p.unrealized_pnl
+                for p in self.get_open_positions()
+            ),
+
+            4,
+        )
+
+    def total_realized_pnl(self):
+
+        return round(
+
+            sum(
+                p.realized_pnl
+                for p in self.get_closed_positions()
+            ),
+
+            4,
+        )
+
+    def equity(self):
+
+        return round(
+
+            self.total_realized_pnl()
+            + self.total_unrealized_pnl(),
+
+            4,
+        )
+
+    def summary(self):
+
+        return {
+
+            "open_positions":
+                len(self.get_open_positions()),
+
+            "closed_positions":
+                len(self.get_closed_positions()),
+
+            "realized_pnl":
+                self.total_realized_pnl(),
+
+            "unrealized_pnl":
+                self.total_unrealized_pnl(),
+
+            "equity":
+                self.equity(),
+
+        }

@@ -1,47 +1,43 @@
-from datetime import datetime
-import time
+from datetime import datetime, timedelta
 
 
 class PaperScheduler:
 
-    def __init__(self, interval_seconds=60):
-        self.interval_seconds = interval_seconds
-        self.running = False
-        self.iteration = 0
+    def __init__(self):
 
-    def start(self):
-        self.running = True
-        print("=" * 70)
-        print("TCP PAPER TRADING SCHEDULER STARTED")
-        print("=" * 70)
+        self.last_report = None
 
-    def stop(self):
-        self.running = False
-        print("=" * 70)
-        print("TCP PAPER TRADING SCHEDULER STOPPED")
-        print("=" * 70)
+        self.report_interval = timedelta(hours=1)
 
-    def tick(self):
-        self.iteration += 1
+    def should_generate_report(self):
 
-        return {
-            "iteration": self.iteration,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
+        now = datetime.now()
 
-    def run(self, callback):
+        if self.last_report is None:
+            self.last_report = now
+            return True
 
-        self.start()
+        if now - self.last_report >= self.report_interval:
 
-        try:
-            while self.running:
+            self.last_report = now
 
-                event = self.tick()
+            return True
 
-                callback(event)
+        return False
 
-                time.sleep(self.interval_seconds)
+    def should_close_candle(self, candle):
 
-        except KeyboardInterrupt:
+        """
+        candle คือข้อมูลจาก Binance kline
 
-            self.stop()
+        Return True เมื่อแท่งปิดแล้ว
+        """
+
+        return candle.get("x", False)
+
+    def next_report_time(self):
+
+        if self.last_report is None:
+            return datetime.now()
+
+        return self.last_report + self.report_interval

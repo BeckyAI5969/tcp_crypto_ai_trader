@@ -7,52 +7,104 @@ class PaperPosition:
 
     symbol: str
     side: str
-    quantity: float
     entry_price: float
+    quantity: float
+    entry_time: datetime
 
-    opened_at: datetime = datetime.utcnow()
+    exit_price: float | None = None
+    exit_time: datetime | None = None
 
     status: str = "OPEN"
 
-    exit_price: float = 0.0
-    closed_at: datetime = None
     realized_pnl: float = 0.0
+    unrealized_pnl: float = 0.0
 
-    def unrealized_pnl(self, current_price: float) -> float:
+    stop_loss: float | None = None
+    take_profit: float | None = None
+
+    strategy_score: float = 0.0
+    signal: str = ""
+
+    def update_price(self, price: float):
 
         if self.side == "BUY":
-            return (current_price - self.entry_price) * self.quantity
 
-        if self.side == "SELL":
-            return (self.entry_price - current_price) * self.quantity
+            self.unrealized_pnl = (
+                price - self.entry_price
+            ) * self.quantity
 
-        return 0.0
+        else:
 
-    def close(self, exit_price: float):
+            self.unrealized_pnl = (
+                self.entry_price - price
+            ) * self.quantity
+
+    def close(
+        self,
+        exit_price: float,
+        exit_time: datetime,
+    ):
 
         self.exit_price = exit_price
-        self.closed_at = datetime.utcnow()
-        self.realized_pnl = self.unrealized_pnl(exit_price)
+        self.exit_time = exit_time
+
+        if self.side == "BUY":
+
+            self.realized_pnl = (
+                exit_price - self.entry_price
+            ) * self.quantity
+
+        else:
+
+            self.realized_pnl = (
+                self.entry_price - exit_price
+            ) * self.quantity
+
         self.status = "CLOSED"
 
-        return self.realized_pnl
+    def is_open(self):
 
-    def to_dict(self, current_price=None):
+        return self.status == "OPEN"
 
-        unrealized = 0.0
-
-        if current_price is not None and self.status == "OPEN":
-            unrealized = self.unrealized_pnl(current_price)
+    def to_dict(self):
 
         return {
+
             "symbol": self.symbol,
+
             "side": self.side,
-            "quantity": self.quantity,
+
             "entry_price": self.entry_price,
+
+            "entry_time": self.entry_time.isoformat(),
+
             "exit_price": self.exit_price,
+
+            "exit_time": (
+                self.exit_time.isoformat()
+                if self.exit_time
+                else None
+            ),
+
+            "quantity": self.quantity,
+
             "status": self.status,
-            "realized_pnl": self.realized_pnl,
-            "unrealized_pnl": unrealized,
-            "opened_at": self.opened_at.isoformat(),
-            "closed_at": self.closed_at.isoformat() if self.closed_at else "",
+
+            "realized_pnl": round(
+                self.realized_pnl,
+                4,
+            ),
+
+            "unrealized_pnl": round(
+                self.unrealized_pnl,
+                4,
+            ),
+
+            "stop_loss": self.stop_loss,
+
+            "take_profit": self.take_profit,
+
+            "strategy_score": self.strategy_score,
+
+            "signal": self.signal,
         }

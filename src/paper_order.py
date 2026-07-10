@@ -3,43 +3,108 @@ from datetime import datetime
 
 
 @dataclass
-class PaperOrder:
+class PaperPosition:
 
     symbol: str
     side: str
+    entry_price: float
     quantity: float
-    price: float
+    entry_time: datetime
 
-    created_at: datetime = datetime.utcnow()
+    exit_price: float | None = None
+    exit_time: datetime | None = None
 
-    status: str = "NEW"
+    status: str = "OPEN"
 
-    filled_price: float = 0.0
+    realized_pnl: float = 0.0
+    unrealized_pnl: float = 0.0
 
-    filled_qty: float = 0.0
+    stop_loss: float | None = None
+    take_profit: float | None = None
 
-    def execute(self):
+    strategy_score: float = 0.0
+    signal: str = ""
 
-        self.status = "FILLED"
+    def update_price(self, price: float):
 
-        self.filled_price = self.price
+        if self.side == "BUY":
 
-        self.filled_qty = self.quantity
+            self.unrealized_pnl = (
+                price - self.entry_price
+            ) * self.quantity
 
-    @property
-    def value(self):
+        else:
 
-        return self.quantity * self.price
+            self.unrealized_pnl = (
+                self.entry_price - price
+            ) * self.quantity
+
+    def close(
+        self,
+        exit_price: float,
+        exit_time: datetime,
+    ):
+
+        self.exit_price = exit_price
+        self.exit_time = exit_time
+
+        if self.side == "BUY":
+
+            self.realized_pnl = (
+                exit_price - self.entry_price
+            ) * self.quantity
+
+        else:
+
+            self.realized_pnl = (
+                self.entry_price - exit_price
+            ) * self.quantity
+
+        self.status = "CLOSED"
+
+    def is_open(self):
+
+        return self.status == "OPEN"
 
     def to_dict(self):
 
         return {
+
             "symbol": self.symbol,
+
             "side": self.side,
+
+            "entry_price": self.entry_price,
+
+            "entry_time": self.entry_time.isoformat(),
+
+            "exit_price": self.exit_price,
+
+            "exit_time": (
+                self.exit_time.isoformat()
+                if self.exit_time
+                else None
+            ),
+
             "quantity": self.quantity,
-            "price": self.price,
-            "filled_price": self.filled_price,
-            "filled_qty": self.filled_qty,
+
             "status": self.status,
-            "created_at": self.created_at.isoformat(),
+
+            "realized_pnl": round(
+                self.realized_pnl,
+                4,
+            ),
+
+            "unrealized_pnl": round(
+                self.unrealized_pnl,
+                4,
+            ),
+
+            "stop_loss": self.stop_loss,
+
+            "take_profit": self.take_profit,
+
+            "strategy_score": self.strategy_score,
+
+            "signal": self.signal,
         }
