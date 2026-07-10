@@ -10,6 +10,7 @@ from config.symbols import SYMBOLS
 from src.candle_buffer import CandleBuffer
 from src.indicator_engine import IndicatorEngine
 from src.strategy_engine import StrategyEngine
+from src.paper_trader import PaperTrader
 
 
 class MarketStreamEngine:
@@ -30,10 +31,13 @@ class MarketStreamEngine:
             "SELL": 0,
             "WAIT": 0,
         }
+
         self.total_signals = 0
         self.started_at = datetime.now()
 
         self.buffer = CandleBuffer(maxlen=self.history_limit)
+        self.paper_trader = PaperTrader()
+
         self.client = None
         self.bm = None
 
@@ -45,7 +49,7 @@ class MarketStreamEngine:
 
     async def connect(self):
         print("=" * 70)
-        print("TCP MARKET STREAM ENGINE - SIGNAL ONLY")
+        print("TCP MARKET STREAM ENGINE - PAPER TRADING COMPLETE")
         print("=" * 70)
 
         self.client = await AsyncClient.create(
@@ -115,9 +119,31 @@ class MarketStreamEngine:
             "macd": float(latest.get("MACD", 0)),
             "macd_signal": float(latest.get("MACD_SIGNAL", 0)),
             "volume": float(latest.get("volume", 0)),
-            "mode": "SIGNAL_ONLY",
+            "mode": "PAPER",
             "order_sent": False,
         }
+
+        if signal in ["BUY", "SELL"]:
+            paper_position = self.paper_trader.on_signal(
+                symbol=symbol,
+                signal=signal,
+                price=price,
+                score=score,
+            )
+
+            managed_position = self.paper_trader.update_market_price(
+                symbol=symbol,
+                price=price,
+            )
+
+            if managed_position is not None:
+                paper_position = managed_position
+
+        else:
+            paper_position = self.paper_trader.update_market_price(
+                symbol=symbol,
+                price=price,
+            )
 
         print("=" * 70)
         print(record["time"])
@@ -125,12 +151,21 @@ class MarketStreamEngine:
         print("Price  :", price)
         print("Signal :", signal)
         print("Score  :", score)
-        print("Order  : NOT SENT")
+        print("Mode   : PAPER")
+
+        if paper_position:
+            print("Paper Position:")
+            print(paper_position.to_dict())
+        else:
+            print("Paper Position: None")
+
+        print("Order  : PAPER ONLY")
         print("=" * 70)
 
         self.save_signal(record)
 
         self.total_signals += 1
+
         if signal in self.signal_counts:
             self.signal_counts[signal] += 1
         else:
@@ -142,9 +177,17 @@ class MarketStreamEngine:
         df = pd.DataFrame([record])
 
         if self.signal_csv.exists():
-            df.to_csv(self.signal_csv, mode="a", header=False, index=False)
+            df.to_csv(
+                self.signal_csv,
+                mode="a",
+                header=False,
+                index=False,
+            )
         else:
-            df.to_csv(self.signal_csv, index=False)
+            df.to_csv(
+                self.signal_csv,
+                index=False,
+            )
 
         with open(self.replay_json, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -153,10 +196,11 @@ class MarketStreamEngine:
         report = {
             "started_at": self.started_at.isoformat(),
             "updated_at": datetime.now().isoformat(),
-            "mode": "SIGNAL_ONLY",
+            "mode": "PAPER",
             "timeframe": self.timeframe,
             "total_signals": self.total_signals,
             "signal_counts": self.signal_counts,
+            "paper_summary": self.paper_trader.summary(),
             "order_sent": False,
             "status": "RUNNING",
         }
@@ -207,6 +251,11 @@ class MarketStreamEngine:
 
     async def close(self):
         self.save_forward_report()
+
+        print()
+        print("FINAL PAPER SUMMARY")
+        print(self.paper_trader.summary())
+        print()
 
         if self.client:
             await self.client.close_connection()

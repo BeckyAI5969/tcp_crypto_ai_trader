@@ -7,13 +7,9 @@ from src.paper_report import PaperReport
 class PaperTrader:
 
     def __init__(self):
-
         self.execution = PaperExecutionEngine()
-
         self.portfolio = PaperPortfolio()
-
         self.logger = PaperTradeLogger()
-
         self.report = PaperReport()
 
         self.default_quantity = 1.0
@@ -26,8 +22,17 @@ class PaperTrader:
         score,
     ):
 
-        if signal == "WAIT":
+        if signal not in ["BUY", "SELL"]:
+            self.update_market_price(symbol, price)
             return None
+
+        current = self.portfolio.find_open_position(symbol)
+
+        if current is not None:
+            current.update_price(price)
+            self.logger.log_update(current)
+            self.report.save(self.portfolio, self.logger)
+            return current
 
         order = self.execution.create_order(
             symbol=symbol,
@@ -37,11 +42,11 @@ class PaperTrader:
             score=score,
         )
 
-        position = self.execution.execute(order)
+        position = self.execution.execute_order(order)
 
         self.portfolio.add_position(position)
 
-        self.logger.save_trade(position)
+        self.logger.log_open(position)
 
         self.report.save(
             self.portfolio,
@@ -56,34 +61,46 @@ class PaperTrader:
         price,
     ):
 
-        self.portfolio.update_market_price(
+        position = self.portfolio.update_market_price(
             symbol,
             price,
         )
 
+        if position:
+            if position.is_open():
+                self.logger.log_update(position)
+            else:
+                self.logger.log_close(position)
+
         self.report.save(
             self.portfolio,
             self.logger,
         )
+
+        return position
 
     def close_position(
         self,
-        position,
+        symbol,
         exit_price,
+        reason="MANUAL",
     ):
 
-        self.execution.close_position(
-            position,
+        position = self.portfolio.close_position(
+            symbol,
             exit_price,
+            reason,
         )
 
-        self.logger.save_trade(position)
+        if position:
+            self.logger.log_close(position)
 
         self.report.save(
             self.portfolio,
             self.logger,
         )
 
-    def summary(self):
+        return position
 
+    def summary(self):
         return self.portfolio.summary()

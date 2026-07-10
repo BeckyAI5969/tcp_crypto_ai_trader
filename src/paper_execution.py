@@ -11,19 +11,17 @@ class PaperExecutionEngine:
 
     def create_order(
         self,
-        symbol,
-        signal,
-        price,
-        quantity,
-        score,
-    ):
+        symbol: str,
+        signal: str,
+        price: float,
+        quantity: float,
+        score: float,
+    ) -> PaperOrder:
 
         side = "BUY" if signal == "BUY" else "SELL"
-
         self.order_counter += 1
 
-        order = PaperOrder(
-            order_id=f"PAPER-{self.order_counter:08d}",
+        return PaperOrder(
             symbol=symbol,
             side=side,
             signal=signal,
@@ -33,14 +31,14 @@ class PaperExecutionEngine:
             created_time=datetime.now(),
         )
 
-        return order
+    def execute_order(
+        self,
+        order: PaperOrder,
+        stop_loss_pct: float = 0.01,
+        take_profit_pct: float = 0.02,
+    ) -> PaperPosition:
 
-    def execute(self, order: PaperOrder):
-
-        order.fill(
-            order.price,
-            datetime.now(),
-        )
+        order.fill(order.price)
 
         position = PaperPosition(
             symbol=order.symbol,
@@ -52,17 +50,35 @@ class PaperExecutionEngine:
             signal=order.signal,
         )
 
+        if position.side == "BUY":
+            position.stop_loss = round(
+                position.entry_price * (1 - stop_loss_pct),
+                8,
+            )
+            position.take_profit = round(
+                position.entry_price * (1 + take_profit_pct),
+                8,
+            )
+
+        else:
+            position.stop_loss = round(
+                position.entry_price * (1 + stop_loss_pct),
+                8,
+            )
+            position.take_profit = round(
+                position.entry_price * (1 - take_profit_pct),
+                8,
+            )
+
         return position
 
     def close_position(
         self,
         position: PaperPosition,
         exit_price: float,
-    ):
+        reason: str = "",
+    ) -> PaperPosition:
 
-        position.close(
-            exit_price,
-            datetime.now(),
-        )
+        position.close(exit_price, reason)
 
         return position

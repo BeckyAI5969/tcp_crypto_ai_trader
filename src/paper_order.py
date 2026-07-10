@@ -1,110 +1,79 @@
 from dataclasses import dataclass
 from datetime import datetime
+from uuid import uuid4
 
 
 @dataclass
-class PaperPosition:
+class PaperOrder:
 
     symbol: str
     side: str
-    entry_price: float
+    signal: str
+    price: float
     quantity: float
-    entry_time: datetime
+    strategy_score: float
+    created_time: datetime
 
-    exit_price: float | None = None
-    exit_time: datetime | None = None
+    order_id: str = ""
+    status: str = "PENDING"
 
-    status: str = "OPEN"
+    filled_price: float | None = None
+    filled_time: datetime | None = None
 
-    realized_pnl: float = 0.0
-    unrealized_pnl: float = 0.0
+    cancel_time: datetime | None = None
+    reason: str = ""
 
-    stop_loss: float | None = None
-    take_profit: float | None = None
+    def __post_init__(self):
 
-    strategy_score: float = 0.0
-    signal: str = ""
+        if not self.order_id:
+            self.order_id = str(uuid4())[:8]
 
-    def update_price(self, price: float):
+    def fill(self, price: float):
 
-        if self.side == "BUY":
+        self.status = "FILLED"
+        self.filled_price = price
+        self.filled_time = datetime.now()
 
-            self.unrealized_pnl = (
-                price - self.entry_price
-            ) * self.quantity
+    def cancel(self, reason: str = ""):
 
-        else:
+        self.status = "CANCELLED"
+        self.cancel_time = datetime.now()
+        self.reason = reason
 
-            self.unrealized_pnl = (
-                self.entry_price - price
-            ) * self.quantity
+    def is_pending(self):
 
-    def close(
-        self,
-        exit_price: float,
-        exit_time: datetime,
-    ):
+        return self.status == "PENDING"
 
-        self.exit_price = exit_price
-        self.exit_time = exit_time
+    def is_filled(self):
 
-        if self.side == "BUY":
+        return self.status == "FILLED"
 
-            self.realized_pnl = (
-                exit_price - self.entry_price
-            ) * self.quantity
+    def is_cancelled(self):
 
-        else:
-
-            self.realized_pnl = (
-                self.entry_price - exit_price
-            ) * self.quantity
-
-        self.status = "CLOSED"
-
-    def is_open(self):
-
-        return self.status == "OPEN"
+        return self.status == "CANCELLED"
 
     def to_dict(self):
 
         return {
-
+            "order_id": self.order_id,
             "symbol": self.symbol,
-
             "side": self.side,
-
-            "entry_price": self.entry_price,
-
-            "entry_time": self.entry_time.isoformat(),
-
-            "exit_price": self.exit_price,
-
-            "exit_time": (
-                self.exit_time.isoformat()
-                if self.exit_time
+            "signal": self.signal,
+            "price": self.price,
+            "quantity": self.quantity,
+            "strategy_score": self.strategy_score,
+            "status": self.status,
+            "created_time": self.created_time.isoformat(),
+            "filled_time": (
+                self.filled_time.isoformat()
+                if self.filled_time
                 else None
             ),
-
-            "quantity": self.quantity,
-
-            "status": self.status,
-
-            "realized_pnl": round(
-                self.realized_pnl,
-                4,
+            "filled_price": self.filled_price,
+            "cancel_time": (
+                self.cancel_time.isoformat()
+                if self.cancel_time
+                else None
             ),
-
-            "unrealized_pnl": round(
-                self.unrealized_pnl,
-                4,
-            ),
-
-            "stop_loss": self.stop_loss,
-
-            "take_profit": self.take_profit,
-
-            "strategy_score": self.strategy_score,
-
-            "signal": self.signal,
+            "reason": self.reason,
         }

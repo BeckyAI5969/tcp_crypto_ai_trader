@@ -1,95 +1,83 @@
-from src.paper_position import PaperPosition
+import json
+from pathlib import Path
+from datetime import datetime
+
+import pandas as pd
 
 
-class PaperPortfolio:
+class PaperTradeLogger:
 
     def __init__(self):
+        self.log_dir = Path("logs")
+        self.log_dir.mkdir(exist_ok=True)
 
-        self.positions = []
+        self.trade_csv = self.log_dir / "paper_trade_log.csv"
+        self.trade_jsonl = self.log_dir / "paper_trade_log.jsonl"
 
-    def add_position(self, position: PaperPosition):
+    def log_open(self, position):
+        record = position.to_dict()
+        record["event"] = "OPEN"
+        record["logged_at"] = datetime.now().isoformat()
+        self._save(record)
 
-        self.positions.append(position)
+    def log_update(self, position):
+        record = position.to_dict()
+        record["event"] = "UPDATE"
+        record["logged_at"] = datetime.now().isoformat()
+        self._save(record)
 
-    def get_open_positions(self):
+    def log_close(self, position):
+        record = position.to_dict()
+        record["event"] = "CLOSE"
+        record["logged_at"] = datetime.now().isoformat()
+        self._save(record)
 
-        return [
-            p
-            for p in self.positions
-            if p.is_open()
-        ]
+    def _save(self, record):
+        df = pd.DataFrame([record])
 
-    def get_closed_positions(self):
+        if self.trade_csv.exists():
+            df.to_csv(
+                self.trade_csv,
+                mode="a",
+                header=False,
+                index=False,
+            )
+        else:
+            df.to_csv(
+                self.trade_csv,
+                index=False,
+            )
 
-        return [
-            p
-            for p in self.positions
-            if not p.is_open()
-        ]
+        with open(
+            self.trade_jsonl,
+            "a",
+            encoding="utf-8",
+        ) as f:
+            f.write(
+                json.dumps(
+                    record,
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
-    def update_market_price(
-        self,
-        symbol,
-        price,
-    ):
+    def load(self):
+        if not self.trade_csv.exists():
+            return pd.DataFrame()
 
-        for p in self.get_open_positions():
+        return pd.read_csv(self.trade_csv)
 
-            if p.symbol == symbol:
+    def total_trades(self):
+        df = self.load()
 
-                p.update_price(price)
+        if df.empty or "event" not in df.columns:
+            return 0
 
-    def total_unrealized_pnl(self):
+        return len(df[df["event"] == "CLOSE"])
 
-        return round(
+    def clear(self):
+        if self.trade_csv.exists():
+            self.trade_csv.unlink()
 
-            sum(
-                p.unrealized_pnl
-                for p in self.get_open_positions()
-            ),
-
-            4,
-        )
-
-    def total_realized_pnl(self):
-
-        return round(
-
-            sum(
-                p.realized_pnl
-                for p in self.get_closed_positions()
-            ),
-
-            4,
-        )
-
-    def equity(self):
-
-        return round(
-
-            self.total_realized_pnl()
-            + self.total_unrealized_pnl(),
-
-            4,
-        )
-
-    def summary(self):
-
-        return {
-
-            "open_positions":
-                len(self.get_open_positions()),
-
-            "closed_positions":
-                len(self.get_closed_positions()),
-
-            "realized_pnl":
-                self.total_realized_pnl(),
-
-            "unrealized_pnl":
-                self.total_unrealized_pnl(),
-
-            "equity":
-                self.equity(),
-
-        }
+        if self.trade_jsonl.exists():
+            self.trade_jsonl.unlink()
