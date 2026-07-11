@@ -12,19 +12,96 @@ class StrategyEngine:
         self.df = pd.read_csv(self.csv_path)
 
     def calculate_score(self):
-        print("Calculating strategy score...")
+        print("Calculating strategy score V2.1...")
 
+        self.df["TrendScore"] = 0
+        self.df["MomentumScore"] = 0
+        self.df["VolumeScore"] = 0
+        self.df["VolatilityScore"] = 0
+        self.df["PullbackScore"] = 0
         self.df["StrategyScore"] = 0
+
         self.df["Decision"] = "WAIT"
+        self.df["SignalStrength"] = "NONE"
+        self.df["SignalReason"] = ""
 
-        self.df.loc[self.df["EMA20"] > self.df["EMA50"], "StrategyScore"] += 25
-        self.df.loc[self.df["MACD"] > self.df["MACD_SIGNAL"], "StrategyScore"] += 25
-        self.df.loc[(self.df["RSI14"] > 45) & (self.df["RSI14"] < 70), "StrategyScore"] += 20
-        self.df.loc[self.df["close"] > self.df["BB_MIDDLE"], "StrategyScore"] += 15
-        self.df.loc[self.df["volume"] > self.df["VOLUME_MA20"], "StrategyScore"] += 15
+        # Trend
+        self.df.loc[self.df["EMA20"] > self.df["EMA50"], "TrendScore"] += 20
+        self.df.loc[self.df["EMA50"] > self.df["EMA200"], "TrendScore"] += 15
 
-        self.df.loc[self.df["StrategyScore"] >= 70, "Decision"] = "BUY"
-        self.df.loc[self.df["StrategyScore"] <= 30, "Decision"] = "SELL"
+        self.df.loc[self.df["EMA20"] < self.df["EMA50"], "TrendScore"] -= 20
+        self.df.loc[self.df["EMA50"] < self.df["EMA200"], "TrendScore"] -= 15
+
+        # Momentum
+        self.df.loc[self.df["MACD"] > self.df["MACD_SIGNAL"], "MomentumScore"] += 15
+        self.df.loc[self.df["MACD_HIST"] > 0, "MomentumScore"] += 10
+        self.df.loc[(self.df["RSI14"] >= 45) & (self.df["RSI14"] <= 72), "MomentumScore"] += 10
+
+        self.df.loc[self.df["MACD"] < self.df["MACD_SIGNAL"], "MomentumScore"] -= 15
+        self.df.loc[self.df["MACD_HIST"] < 0, "MomentumScore"] -= 10
+        self.df.loc[(self.df["RSI14"] >= 28) & (self.df["RSI14"] <= 55), "MomentumScore"] -= 10
+
+        # Volume
+        self.df.loc[self.df["volume"] > self.df["VOLUME_MA20"], "VolumeScore"] += 15
+
+        # Volatility
+        self.df.loc[self.df["ATR14"] > 0, "VolatilityScore"] += 10
+
+        # Pullback / Entry quality
+        self.df.loc[
+            (self.df["close"] >= self.df["EMA20"] * 0.995)
+            & (self.df["close"] <= self.df["EMA20"] * 1.02),
+            "PullbackScore",
+        ] += 10
+
+        self.df.loc[
+            (self.df["close"] <= self.df["EMA20"] * 1.005)
+            & (self.df["close"] >= self.df["EMA20"] * 0.98),
+            "PullbackScore",
+        ] -= 10
+
+        self.df["StrategyScore"] = (
+            self.df["TrendScore"]
+            + self.df["MomentumScore"]
+            + self.df["VolumeScore"]
+            + self.df["VolatilityScore"]
+            + self.df["PullbackScore"]
+        )
+
+        # Long signal
+        self.df.loc[
+            self.df["StrategyScore"] >= 60,
+            "Decision",
+        ] = "BUY"
+
+        # Short signal
+        self.df.loc[
+            self.df["StrategyScore"] <= -60,
+            "Decision",
+        ] = "SELL"
+
+        # Strength
+        self.df.loc[self.df["StrategyScore"].abs() >= 90, "SignalStrength"] = "HIGH"
+        self.df.loc[
+            (self.df["StrategyScore"].abs() >= 75)
+            & (self.df["StrategyScore"].abs() < 90),
+            "SignalStrength",
+        ] = "STRONG"
+        self.df.loc[
+            (self.df["StrategyScore"].abs() >= 60)
+            & (self.df["StrategyScore"].abs() < 75),
+            "SignalStrength",
+        ] = "NORMAL"
+
+        self.df.loc[self.df["Decision"] == "BUY", "SignalReason"] = (
+            "Trend/Momentum bullish with valid volatility"
+        )
+        self.df.loc[self.df["Decision"] == "SELL", "SignalReason"] = (
+            "Trend/Momentum bearish with valid volatility"
+        )
+        self.df.loc[self.df["Decision"] == "WAIT", "SignalReason"] = (
+            "No sufficient trading edge"
+        )
 
     def calculate_dataframe(self, df):
         self.df = df.copy()

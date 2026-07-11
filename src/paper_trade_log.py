@@ -36,36 +36,22 @@ class PaperTradeLogger:
         df = pd.DataFrame([record])
 
         if self.trade_csv.exists():
-            df.to_csv(
-                self.trade_csv,
-                mode="a",
-                header=False,
-                index=False,
-            )
+            df.to_csv(self.trade_csv, mode="a", header=False, index=False)
         else:
-            df.to_csv(
-                self.trade_csv,
-                index=False,
-            )
+            df.to_csv(self.trade_csv, index=False)
 
-        with open(
-            self.trade_jsonl,
-            "a",
-            encoding="utf-8",
-        ) as f:
-            f.write(
-                json.dumps(
-                    record,
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
+        with open(self.trade_jsonl, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     def load(self):
         if not self.trade_csv.exists():
             return pd.DataFrame()
 
-        return pd.read_csv(self.trade_csv)
+        try:
+            return pd.read_csv(self.trade_csv)
+        except pd.errors.ParserError:
+            self.trade_csv.unlink()
+            return pd.DataFrame()
 
     def total_trades(self):
         df = self.load()

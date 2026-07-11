@@ -1,103 +1,272 @@
-import json
-import pandas as pd
-from pathlib import Path
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+
+from src.paper_position import PaperPosition
+
+
+@dataclass
+class PositionUpdateResult:
+    position: PaperPosition | None
+    closed: bool
+    reason: str
+    action: str
 
 
 class PositionManager:
 
-    def __init__(self, csv_path, position_path="logs/position.json"):
-        self.csv_path = csv_path
-        self.position_path = Path(position_path)
-        self.df = None
+    def __init__(
+        self,
+        break_even_trigger_r: float = 1.0,
+        trailing_trigger_r: float = 1.5,
+        trailing_distance_r: float = 1.0,
+        max_holding_minutes: int = 720,
+    ):
+        self.break_even_trigger_r = break_even_trigger_r
+        self.trailing_trigger_r = trailing_trigger_r
+        self.trailing_distance_r = trailing_distance_r
+        self.max_holding_minutes = max_holding_minutes
 
-    def load_csv(self):
-        print("Loading CSV...")
-        self.df = pd.read_csv(self.csv_path)
+        self.closed_position_keys = set()
 
-    def load_position(self):
-        if self.position_path.exists():
-            with open(self.position_path, "r") as file:
-                return json.load(file)
+    def update_position(
+        self,
+        position: PaperPosition,
+        price: float,
+        now: datetime | None = None,
+    ) -> PositionUpdateResult:
 
-        return {
-            "status": "CLOSED",
-            "symbol": "BTCUSDT",
-            "entry_price": 0,
-            "quantity": 0,
-            "entry_time": ""
-        }
+        if position is None:
+            return PositionUpdateResult(
+                position=None,
+                closed=False,
+                reason="POSITION_NOT_FOUND",
+                action="NONE",
+            )
 
-    def save_position(self, position):
-        self.position_path.parent.mkdir(parents=True, exist_ok=True)
+        if not position.is_open():
+            return PositionUpdateResult(
+                position=position,
+                closed=False,
+                reason="POSITION_ALREADY_CLOSED",
+                action="NONE",
+            )
 
-        with open(self.position_path, "w") as file:
-            json.dump(position, file, indent=4)
+        now = now or datetime.now()
 
-    def manage(self):
-        print("Managing position...")
+        position.update_price(price)
 
-        latest = self.df.iloc[-1]
-        position = self.load_position()
+        time_exit = self._check_time_exit(position, now)
 
-        price = latest["close"]
-        decision = latest.get("AI_DECISION", "WAIT")
-        score = latest.get("AI_SCORE", 0)
+        if time_exit:
+            return self._close_once(
+                position=position,
+                price=price,
+                reason="TIME_EXIT",
+            )
 
-        print("=" * 45)
-        print("Position Manager")
-        print("=" * 45)
-        print(f"Current Status : {position['status']}")
-        print(f"AI Decision    : {decision}")
-        print(f"AI Score       : {score}")
-        print(f"Close Price    : {price:.2f}")
+        should_close, close_reason = position.should_close(price)
 
-        if position["status"] == "CLOSED" and decision == "BUY":
-            position = {
-                "status": "OPEN",
-                "symbol": "BTCUSDT",
-                "entry_price": float(price),
-                "quantity": 1,
-                "entry_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
+        if should_close:
+            return self._close_once(
+                position=position,
+                price=price,
+                reason=close_reason,
+            )
 
-            print("Action         : OPEN POSITION")
+        self._apply_break_even(position, price)
+        self._apply_trailing_stop(position, price)
 
-        elif position["status"] == "OPEN" and decision == "SELL":
-            pnl_pct = ((price - position["entry_price"]) / position["entry_price"]) * 100
+        should_close, close_reason = position.should_close(price)
 
-            print("Action         : CLOSE POSITION")
-            print(f"Entry Price    : {position['entry_price']:.2f}")
-            print(f"PNL            : {pnl_pct:.2f}%")
+        if should_close:
+            return self._close_once(
+                position=position,
+                price=price,
+                reason=close_reason,
+            )
 
-            position = {
-                "status": "CLOSED",
-                "symbol": "BTCUSDT",
-                "entry_price": 0,
-                "quantity": 0,
-                "entry_time": ""
-            }
+        return PositionUpdateResult(
+            position=position,
+            closed=False,
+            reason="POSITION_UPDATED",
+            action="UPDATE",
+        )
+
+    def close_position(
+        self,
+        position: PaperPosition,
+        price: float,
+        reason: str = "MANUAL",
+    ) -> PositionUpdateResult:
+
+        if position is None:
+            return PositionUpdateResult(
+                position=None,
+                closed=False,
+                reason="POSITION_NOT_FOUND",
+                action="NONE",
+            )
+
+        if not position.is_open():
+            return PositionUpdateResult(
+                position=position,
+                closed=False,
+                reason="POSITION_ALREADY_CLOSED",
+                action="NONE",
+            )
+
+        return self._close_once(
+            position=position,
+            price=price,
+            reason=reason,
+        )
+
+    def _apply_break_even(
+        self,
+        position: PaperPosition,
+        price: float,
+    ):
+
+        initial_risk = self._initial_risk_distance(position)
+
+        if initial_risk <= 0:
+            return
+
+        trigger_distance = initial_risk * self.break_even_trigger_r
+
+        if position.side == "BUY":
+            if price >= position.entry_price + trigger_distance:
+                if (
+                    position.stop_loss is None
+                    or position.stop_loss < position.entry_price
+                ):
+                    position.stop_loss = position.entry_price
 
         else:
-            print("Action         : HOLD / WAIT")
+            if price <= position.entry_price - trigger_distance:
+                if (
+                    position.stop_loss is None
+                    or position.stop_loss > position.entry_price
+                ):
+                    position.stop_loss = position.entry_price
 
-        self.save_position(position)
+    def _apply_trailing_stop(
+        self,
+        position: PaperPosition,
+        price: float,
+    ):
 
-        print("=" * 45)
-        print("Saved ->", self.position_path)
+        initial_risk = self._initial_risk_distance(position)
 
-    def run(self):
-        self.load_csv()
-        self.manage()
+        if initial_risk <= 0:
+            return
 
+        trigger_distance = initial_risk * self.trailing_trigger_r
+        trailing_distance = initial_risk * self.trailing_distance_r
 
-def main():
-    manager = PositionManager(
-        "data/BTCUSDT/15m/BTCUSDT_15m.csv"
-    )
+        if position.side == "BUY":
+            if price < position.entry_price + trigger_distance:
+                return
 
-    manager.run()
+            new_stop = price - trailing_distance
 
+            if (
+                position.trailing_stop is None
+                or new_stop > position.trailing_stop
+            ):
+                position.trailing_stop = new_stop
 
-if __name__ == "__main__":
-    main()
+            if (
+                position.stop_loss is None
+                or position.trailing_stop > position.stop_loss
+            ):
+                position.stop_loss = position.trailing_stop
+
+        else:
+            if price > position.entry_price - trigger_distance:
+                return
+
+            new_stop = price + trailing_distance
+
+            if (
+                position.trailing_stop is None
+                or new_stop < position.trailing_stop
+            ):
+                position.trailing_stop = new_stop
+
+            if (
+                position.stop_loss is None
+                or position.trailing_stop < position.stop_loss
+            ):
+                position.stop_loss = position.trailing_stop
+
+    def _check_time_exit(
+        self,
+        position: PaperPosition,
+        now: datetime,
+    ) -> bool:
+
+        if self.max_holding_minutes <= 0:
+            return False
+
+        maximum_holding = timedelta(
+            minutes=self.max_holding_minutes
+        )
+
+        return now - position.entry_time >= maximum_holding
+
+    def _initial_risk_distance(
+        self,
+        position: PaperPosition,
+    ) -> float:
+
+        if position.stop_loss is None:
+            return 0.0
+
+        return abs(
+            position.entry_price - position.stop_loss
+        )
+
+    def _close_once(
+        self,
+        position: PaperPosition,
+        price: float,
+        reason: str,
+    ) -> PositionUpdateResult:
+
+        position_key = self._position_key(position)
+
+        if position_key in self.closed_position_keys:
+            return PositionUpdateResult(
+                position=position,
+                closed=False,
+                reason="DUPLICATE_CLOSE_BLOCKED",
+                action="NONE",
+            )
+
+        position.close(
+            exit_price=price,
+            reason=reason,
+        )
+
+        self.closed_position_keys.add(position_key)
+
+        return PositionUpdateResult(
+            position=position,
+            closed=True,
+            reason=reason,
+            action="CLOSE",
+        )
+
+    def _position_key(
+        self,
+        position: PaperPosition,
+    ) -> str:
+
+        return (
+            f"{position.symbol}|"
+            f"{position.side}|"
+            f"{position.entry_time.isoformat()}|"
+            f"{position.entry_price}|"
+            f"{position.quantity}"
+        )
