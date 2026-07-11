@@ -1,0 +1,21 @@
+[Unit]
+Description=TCP Crypto AI Trader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/%i/tcp_crypto_ai_trader
+EnvironmentFile=/home/%i/tcp_crypto_ai_trader/.env
+ExecStart=/home/%i/tcp_crypto_ai_trader/.venv/bin/python /home/%i/tcp_crypto_ai_trader/start.py
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+StandardOutput=append:/home/%i/tcp_crypto_ai_trader/logs/application.log
+StandardError=append:/home/%i/tcp_crypto_ai_trader/logs/application.log
+
+[Install]
+WantedBy=multi-user.target

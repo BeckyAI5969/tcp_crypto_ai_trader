@@ -7,6 +7,7 @@ from src.paper_report import PaperReport
 from src.paper_trade_log import PaperTradeLogger
 from src.position_manager import PositionManager
 from src.position_state_store import PositionStateStore
+from src.reporting_engine import ReportingEngine
 from src.risk_manager import RiskManager
 from src.risk_report import RiskReport
 
@@ -26,6 +27,7 @@ class PaperTrader:
 
         self.state_store = PositionStateStore()
         self.line_alert = LineAlert()
+        self.reporting = ReportingEngine()
 
         self.recovered_positions = 0
         self.last_risk_rejection = None
@@ -92,6 +94,16 @@ class PaperTrader:
             print("Reason :", decision.reason)
             print()
 
+            self.reporting.record_risk_rejected(
+                symbol=symbol,
+                side=signal,
+                reason=decision.reason,
+                price=price,
+                strategy_score=score,
+                portfolio_summary=portfolio_summary,
+                metadata=self.last_risk_rejection,
+            )
+
             self.line_alert.risk_rejected(
                 symbol=symbol,
                 reason=decision.reason,
@@ -148,10 +160,22 @@ class PaperTrader:
             print("Reason :", portfolio_decision.reason)
             print()
 
+            current_summary = self.portfolio.summary()
+
+            self.reporting.record_risk_rejected(
+                symbol=symbol,
+                side=signal,
+                reason=portfolio_decision.reason,
+                price=price,
+                strategy_score=score,
+                portfolio_summary=current_summary,
+                metadata=self.last_risk_rejection,
+            )
+
             self.line_alert.risk_rejected(
                 symbol=symbol,
                 reason=portfolio_decision.reason,
-                portfolio_summary=self.portfolio.summary(),
+                portfolio_summary=current_summary,
             )
 
             self._save_all()
@@ -163,9 +187,16 @@ class PaperTrader:
         self.last_risk_rejection = None
         self._save_all()
 
+        updated_summary = self.portfolio.summary()
+
+        self.reporting.record_position_opened(
+            position=position,
+            portfolio_summary=updated_summary,
+        )
+
         self.line_alert.position_opened(
             position=position,
-            portfolio_summary=self.portfolio.summary(),
+            portfolio_summary=updated_summary,
         )
 
         return position
@@ -200,9 +231,16 @@ class PaperTrader:
 
             self._save_all()
 
+            updated_summary = self.portfolio.summary()
+
+            self.reporting.record_position_closed(
+                position=position,
+                portfolio_summary=updated_summary,
+            )
+
             self.line_alert.position_closed(
                 position=position,
-                portfolio_summary=self.portfolio.summary(),
+                portfolio_summary=updated_summary,
             )
 
             return position
@@ -239,15 +277,34 @@ class PaperTrader:
 
             self._save_all()
 
+            updated_summary = self.portfolio.summary()
+
+            self.reporting.record_position_closed(
+                position=position,
+                portfolio_summary=updated_summary,
+            )
+
             self.line_alert.position_closed(
                 position=position,
-                portfolio_summary=self.portfolio.summary(),
+                portfolio_summary=updated_summary,
             )
 
             return position
 
         self._save_all()
         return position
+
+    def refresh_reporting(self):
+        return self.reporting.refresh(
+            portfolio_summary=self.portfolio.summary(),
+            risk_summary=self.risk_summary(),
+        )
+
+    def send_daily_report(self):
+        return self.reporting.send_daily_line(
+            portfolio_summary=self.portfolio.summary(),
+            risk_summary=self.risk_summary(),
+        )
 
     def _apply_exit_costs(self, position):
         if position.exit_price is None:
@@ -382,11 +439,29 @@ class PaperTrader:
 
             print()
 
+            self.reporting.record_system_event(
+                event_type="RECOVERY",
+                reason=(
+                    f"{self.recovered_positions} "
+                    "open position(s) restored"
+                ),
+                metadata={
+                    "recovered_positions":
+                        self.recovered_positions,
+                },
+                portfolio_summary=self.portfolio.summary(),
+            )
+
             self.line_alert.recovery_restored(
                 self.recovered_positions
             )
 
         self._save_all()
+
+        self.reporting.refresh(
+            portfolio_summary=self.portfolio.summary(),
+            risk_summary=self.risk_summary(),
+        )
 
     def summary(self):
         summary = self.portfolio.summary()
@@ -397,6 +472,10 @@ class PaperTrader:
 
         summary["last_risk_rejection"] = (
             self.last_risk_rejection
+        )
+
+        summary["reporting"] = (
+            self.reporting.summary()
         )
 
         return summary

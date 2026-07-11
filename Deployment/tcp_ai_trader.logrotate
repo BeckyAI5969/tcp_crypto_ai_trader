@@ -1,0 +1,12 @@
+/home/*/tcp_crypto_ai_trader/logs/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    dateext
+    dateformat -%Y%m%d
+    create 0640 root root
+}

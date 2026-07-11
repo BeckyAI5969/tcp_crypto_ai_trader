@@ -1,2 +1,5 @@
-# Intentionally empty.
-# Python standard library only.
+python-binance
+pandas
+requests
+python-dotenv
+tzdata
