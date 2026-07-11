@@ -35,3 +35,4 @@ config/api_config.json
 Thumbs.db
 .env
 .env.*
+!.env.example
