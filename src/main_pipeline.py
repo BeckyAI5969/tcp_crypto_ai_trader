@@ -12,6 +12,8 @@ from typing import Any
 from dynamic_leverage_engine import DynamicLeverageEngine
 from order_builder import OrderBuilder
 from paper_execution_engine import PaperExecutionEngine
+from testnet_trade_executor import TestnetTradeExecutor, TestnetOrderRequest
+from config import SETTINGS
 from position_size_calculator import PositionSizeCalculator
 from stop_loss_take_profit_engine import StopLossTakeProfitEngine
 from trade_execution_engine import (
@@ -65,6 +67,35 @@ class MainPipeline:
         self.execution_planner = TradeExecutionEngine()
         self.order_builder = OrderBuilder()
         self.paper_execution_engine = PaperExecutionEngine()
+
+
+    def execute_trade(self, order):
+        """Dispatch execution based on configured execution mode."""
+        mode = SETTINGS.execution_mode.upper()
+
+        if mode == "PAPER":
+            return self.paper_execution_engine.execute(
+                symbol=order.symbol,
+                side=order.side,
+                quantity=order.quantity,
+                entry_price=order.entry_price,
+                leverage=order.leverage,
+                stop_loss=order.stop_loss,
+                take_profit=order.take_profit,
+            )
+
+        executor = TestnetTradeExecutor()
+        request = TestnetOrderRequest(
+            symbol=order.symbol,
+            side=order.side,
+            quantity=order.quantity,
+            order_type=order.order_type,
+        )
+
+        if mode == "TESTNET":
+            return executor.execute(request, submit=False)
+
+        raise ValueError(f"Unsupported execution mode: {mode}")
 
     def run(self, context: PipelineContext) -> MainPipelineResult:
         side = context.side.upper()
@@ -177,15 +208,7 @@ class MainPipeline:
             take_profit=execution_plan.take_profit,
         )
 
-        paper_trade = self.paper_execution_engine.execute(
-            symbol=order.symbol,
-            side=order.side,
-            quantity=order.quantity,
-            entry_price=order.entry_price,
-            leverage=order.leverage,
-            stop_loss=order.stop_loss,
-            take_profit=order.take_profit,
-        )
+        paper_trade = self.execute_trade(order)
 
         return MainPipelineResult(
             success=True,
