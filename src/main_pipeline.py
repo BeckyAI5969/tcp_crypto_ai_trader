@@ -1,7 +1,9 @@
 """Main orchestration pipeline for TCP Crypto AI Trader.
 
-This module connects the risk and paper-execution components created in
-Sprints 17-18. It does not connect to Binance and does not place real orders.
+This module connects decision gates, risk controls, position sizing,
+execution planning, paper execution, and safe Testnet validation.
+
+Default execution remains PAPER.
 """
 
 from __future__ import annotations
@@ -9,13 +11,22 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from config import SETTINGS
 from dynamic_leverage_engine import DynamicLeverageEngine
 from order_builder import OrderBuilder
 from paper_execution_engine import PaperExecutionEngine
-from testnet_trade_executor import TestnetTradeExecutor, TestnetOrderRequest
-from config import SETTINGS
 from position_size_calculator import PositionSizeCalculator
 from stop_loss_take_profit_engine import StopLossTakeProfitEngine
+from structured_logger import (
+    get_error_logger,
+    get_pipeline_logger,
+    get_risk_logger,
+    get_trade_logger,
+)
+from testnet_trade_executor import (
+    TestnetOrderRequest,
+    TestnetTradeExecutor,
+)
 from trade_execution_engine import (
     TradeExecutionEngine,
     TradeExecutionInput,
@@ -58,7 +69,7 @@ class MainPipelineResult:
 
 
 class MainPipeline:
-    """Run the complete paper-trading preparation flow."""
+    """Run the complete paper/Testnet-validation preparation flow."""
 
     def __init__(self) -> None:
         self.leverage_engine = DynamicLeverageEngine()
@@ -68,13 +79,26 @@ class MainPipeline:
         self.order_builder = OrderBuilder()
         self.paper_execution_engine = PaperExecutionEngine()
 
+        self.pipeline_logger = get_pipeline_logger()
+        self.trade_logger = get_trade_logger()
+        self.risk_logger = get_risk_logger()
+        self.error_logger = get_error_logger()
 
-    def execute_trade(self, order):
+    def execute_trade(self, order: Any) -> Any:
         """Dispatch execution based on configured execution mode."""
+
         mode = SETTINGS.execution_mode.upper()
 
+        self.trade_logger.info(
+            "Execution dispatch started",
+            symbol=order.symbol,
+            side=order.side,
+            execution_mode=mode,
+            quantity=order.quantity,
+        )
+
         if mode == "PAPER":
-            return self.paper_execution_engine.execute(
+            result = self.paper_execution_engine.execute(
                 symbol=order.symbol,
                 side=order.side,
                 quantity=order.quantity,
@@ -84,153 +108,283 @@ class MainPipeline:
                 take_profit=order.take_profit,
             )
 
-        executor = TestnetTradeExecutor()
-        request = TestnetOrderRequest(
-            symbol=order.symbol,
-            side=order.side,
-            quantity=order.quantity,
-            order_type=order.order_type,
-        )
+            self.trade_logger.info(
+                "Paper execution completed",
+                symbol=order.symbol,
+                side=order.side,
+                status=result.status,
+                quantity=result.quantity,
+            )
+            return result
 
         if mode == "TESTNET":
-            return executor.execute(request, submit=False)
+            executor = TestnetTradeExecutor()
 
-        raise ValueError(f"Unsupported execution mode: {mode}")
-
-    def run(self, context: PipelineContext) -> MainPipelineResult:
-        side = context.side.upper()
-
-        if side not in {"BUY", "SELL"}:
-            return self._failed(
-                stage="INPUT_VALIDATION",
-                reason="side must be BUY or SELL.",
+            request = TestnetOrderRequest(
+                symbol=order.symbol,
+                side=order.side,
+                quantity=order.quantity,
+                order_type=order.order_type,
             )
 
-        if not context.decision_approved:
-            return self._failed(
-                stage="AI_DECISION",
-                reason="AI decision was not approved.",
+            result = executor.execute(
+                request,
+                submit=False,
             )
 
-        if not context.risk_approved:
-            return self._failed(
-                stage="RISK_VALIDATION",
-                reason="Risk validation was not approved.",
+            self.trade_logger.info(
+                "Testnet order validation completed",
+                symbol=order.symbol,
+                side=order.side,
+                status=result.status,
+                submitted_to_matching_engine=(
+                    result.submitted_to_matching_engine
+                ),
             )
+            return result
 
-        leverage = self.leverage_engine.evaluate(
+        raise ValueError(
+            f"Unsupported execution mode: {mode}"
+        )
+
+    def run(
+        self,
+        context: PipelineContext,
+    ) -> MainPipelineResult:
+
+        self.pipeline_logger.info(
+            "Pipeline started",
             symbol=context.symbol,
+            side=context.side,
             confidence=context.confidence,
-            volatility_pct=context.volatility_pct,
-            margin_usage_pct=context.current_margin_usage_pct,
+            execution_mode=SETTINGS.execution_mode,
         )
 
-        if not leverage.approved:
-            return self._failed(
-                stage="DYNAMIC_LEVERAGE",
-                reason=leverage.reason,
-                data={"leverage": leverage.as_dict()},
+        try:
+            side = context.side.upper()
+
+            if side not in {"BUY", "SELL"}:
+                return self._failed(
+                    stage="INPUT_VALIDATION",
+                    reason="side must be BUY or SELL.",
+                    context=context,
+                )
+
+            if not context.decision_approved:
+                return self._failed(
+                    stage="AI_DECISION",
+                    reason="AI decision was not approved.",
+                    context=context,
+                )
+
+            if not context.risk_approved:
+                return self._failed(
+                    stage="RISK_VALIDATION",
+                    reason="Risk validation was not approved.",
+                    context=context,
+                )
+
+            leverage = self.leverage_engine.evaluate(
+                symbol=context.symbol,
+                confidence=context.confidence,
+                volatility_pct=context.volatility_pct,
+                margin_usage_pct=(
+                    context.current_margin_usage_pct
+                ),
             )
 
-        exit_plan = self.exit_engine.calculate(
-            side=side,
-            entry_price=context.entry_price,
-            atr=context.atr,
-        )
+            if not leverage.approved:
+                return self._failed(
+                    stage="DYNAMIC_LEVERAGE",
+                    reason=leverage.reason,
+                    context=context,
+                    data={
+                        "leverage": leverage.as_dict(),
+                    },
+                )
 
-        if not exit_plan.approved:
-            return self._failed(
-                stage="EXIT_PLAN",
-                reason=exit_plan.reason,
-                data={"exit_plan": exit_plan.as_dict()},
+            self.risk_logger.info(
+                "Dynamic leverage approved",
+                symbol=context.symbol,
+                leverage=leverage.leverage,
+                confidence=context.confidence,
+                volatility_pct=context.volatility_pct,
             )
 
-        position = self.position_calculator.calculate(
-            account_balance=context.account_balance,
-            free_margin=context.free_margin,
-            risk_pct=context.risk_pct,
-            entry_price=context.entry_price,
-            stop_loss=exit_plan.stop_loss,
-            leverage=leverage.leverage,
-        )
-
-        if not position.approved:
-            return self._failed(
-                stage="POSITION_SIZING",
-                reason=position.reason,
-                data={"position": position.as_dict()},
+            exit_plan = self.exit_engine.calculate(
+                side=side,
+                entry_price=context.entry_price,
+                atr=context.atr,
             )
 
-        execution_input = TradeExecutionInput(
-            symbol=context.symbol,
-            side=side,
-            confidence=context.confidence,
-            entry_price=context.entry_price,
-            quantity=position.quantity,
-            notional_value=position.notional_value,
-            required_margin=position.required_margin,
-            leverage=leverage.leverage,
-            stop_loss=exit_plan.stop_loss,
-            take_profit=exit_plan.take_profit,
-            risk_reward=exit_plan.risk_reward,
-            risk_amount=position.risk_amount,
-            risk_pct=position.risk_pct,
-            decision_approved=context.decision_approved,
-            risk_approved=context.risk_approved,
-            leverage_approved=leverage.approved,
-            position_size_approved=position.approved,
-            exit_plan_approved=exit_plan.approved,
-        )
+            if not exit_plan.approved:
+                return self._failed(
+                    stage="EXIT_PLAN",
+                    reason=exit_plan.reason,
+                    context=context,
+                    data={
+                        "exit_plan": exit_plan.as_dict(),
+                    },
+                )
 
-        execution_plan = self.execution_planner.build_plan(
-            execution_input
-        )
+            position = self.position_calculator.calculate(
+                account_balance=context.account_balance,
+                free_margin=context.free_margin,
+                risk_pct=context.risk_pct,
+                entry_price=context.entry_price,
+                stop_loss=exit_plan.stop_loss,
+                leverage=leverage.leverage,
+            )
 
-        if not execution_plan.approved:
-            return self._failed(
-                stage="EXECUTION_PLAN",
-                reason=execution_plan.reason,
+            if not position.approved:
+                return self._failed(
+                    stage="POSITION_SIZING",
+                    reason=position.reason,
+                    context=context,
+                    data={
+                        "position": position.as_dict(),
+                    },
+                )
+
+            self.risk_logger.info(
+                "Position sizing approved",
+                symbol=context.symbol,
+                risk_amount=position.risk_amount,
+                risk_pct=position.risk_pct,
+                required_margin=position.required_margin,
+                quantity=position.quantity,
+            )
+
+            execution_input = TradeExecutionInput(
+                symbol=context.symbol,
+                side=side,
+                confidence=context.confidence,
+                entry_price=context.entry_price,
+                quantity=position.quantity,
+                notional_value=position.notional_value,
+                required_margin=position.required_margin,
+                leverage=leverage.leverage,
+                stop_loss=exit_plan.stop_loss,
+                take_profit=exit_plan.take_profit,
+                risk_reward=exit_plan.risk_reward,
+                risk_amount=position.risk_amount,
+                risk_pct=position.risk_pct,
+                decision_approved=context.decision_approved,
+                risk_approved=context.risk_approved,
+                leverage_approved=leverage.approved,
+                position_size_approved=position.approved,
+                exit_plan_approved=exit_plan.approved,
+            )
+
+            execution_plan = (
+                self.execution_planner.build_plan(
+                    execution_input
+                )
+            )
+
+            if not execution_plan.approved:
+                return self._failed(
+                    stage="EXECUTION_PLAN",
+                    reason=execution_plan.reason,
+                    context=context,
+                    data={
+                        "leverage": leverage.as_dict(),
+                        "exit_plan": exit_plan.as_dict(),
+                        "position": position.as_dict(),
+                        "execution_plan": (
+                            execution_plan.as_dict()
+                        ),
+                    },
+                )
+
+            order = self.order_builder.build(
+                symbol=execution_plan.symbol,
+                side=execution_plan.side,
+                quantity=execution_plan.quantity,
+                leverage=execution_plan.leverage,
+                entry_price=execution_plan.entry_price,
+                stop_loss=execution_plan.stop_loss,
+                take_profit=execution_plan.take_profit,
+            )
+
+            execution = self.execute_trade(order)
+
+            result = MainPipelineResult(
+                success=True,
+                stage="COMPLETED",
+                reason=(
+                    "Trading pipeline completed successfully."
+                ),
                 data={
                     "leverage": leverage.as_dict(),
                     "exit_plan": exit_plan.as_dict(),
                     "position": position.as_dict(),
-                    "execution_plan": execution_plan.as_dict(),
+                    "execution_plan": (
+                        execution_plan.as_dict()
+                    ),
+                    "order": order.as_dict(),
+                    "execution": execution.as_dict(),
+                    # Kept for backward compatibility with
+                    # the existing integration test.
+                    "paper_trade": (
+                        execution.as_dict()
+                        if SETTINGS.execution_mode.upper()
+                        == "PAPER"
+                        else None
+                    ),
+                    "testnet_execution": (
+                        execution.as_dict()
+                        if SETTINGS.execution_mode.upper()
+                        == "TESTNET"
+                        else None
+                    ),
                 },
             )
 
-        order = self.order_builder.build(
-            symbol=execution_plan.symbol,
-            side=execution_plan.side,
-            quantity=execution_plan.quantity,
-            leverage=execution_plan.leverage,
-            entry_price=execution_plan.entry_price,
-            stop_loss=execution_plan.stop_loss,
-            take_profit=execution_plan.take_profit,
-        )
+            self.pipeline_logger.info(
+                "Pipeline completed",
+                symbol=context.symbol,
+                side=side,
+                stage=result.stage,
+                success=result.success,
+                execution_mode=SETTINGS.execution_mode,
+            )
 
-        paper_trade = self.execute_trade(order)
+            return result
 
-        return MainPipelineResult(
-            success=True,
-            stage="COMPLETED",
-            reason="Paper trade pipeline completed successfully.",
-            data={
-                "leverage": leverage.as_dict(),
-                "exit_plan": exit_plan.as_dict(),
-                "position": position.as_dict(),
-                "execution_plan": execution_plan.as_dict(),
-                "order": order.as_dict(),
-                "paper_trade": paper_trade.as_dict(),
-            },
-        )
+        except Exception as exc:
+            self.error_logger.exception(
+                "Unhandled pipeline exception",
+                symbol=context.symbol,
+                side=context.side,
+                stage="UNHANDLED_EXCEPTION",
+                reason=str(exc),
+            )
 
-    @staticmethod
+            return MainPipelineResult(
+                success=False,
+                stage="UNHANDLED_EXCEPTION",
+                reason=str(exc),
+                data={},
+            )
+
     def _failed(
+        self,
         *,
         stage: str,
         reason: str,
+        context: PipelineContext,
         data: dict[str, Any] | None = None,
     ) -> MainPipelineResult:
+
+        self.error_logger.error(
+            "Pipeline rejected",
+            symbol=context.symbol,
+            side=context.side,
+            stage=stage,
+            reason=reason,
+        )
+
         return MainPipelineResult(
             success=False,
             stage=stage,
