@@ -1,0 +1,12 @@
+{
+  "lessons": [
+    {
+      "source": "v0.1.0",
+      "lesson": "Constant AI score cannot rank trades"
+    },
+    {
+      "source": "v0.1.1",
+      "lesson": "Research exits and fixed sizing recovered edge"
+    }
+  ]
+}

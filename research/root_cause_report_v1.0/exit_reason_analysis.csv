@@ -1,0 +1,4 @@
+exit_reason,trades,wins,win_rate,gross_profit,gross_loss,net_profit,average_profit,average_holding_hours
+EMA20_EXIT,123,56,45.53,809.4119,-396.3478,413.0642,3.3582,4.2358
+STOP_LOSS,344,0,0.0,0.0,-17459.9841,-17459.9841,-50.7558,1.6977
+TAKE_PROFIT,114,114,100.0,10638.6982,0.0,10638.6982,93.3219,2.6535

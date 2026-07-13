@@ -1,0 +1,37 @@
+{
+  "version": "v0.1.0",
+  "display_name": "v0.1.0",
+  "edition": "Production Baseline",
+  "parent": "research_original",
+  "status": "ARCHIVED",
+  "goal": "Production-style pipeline baseline",
+  "created_at_utc": "2026-07-13T08:37:37.917051+00:00",
+  "metrics": {
+    "trades": 581.0,
+    "win_rate": 29.259896729776248,
+    "profit_factor": 0.65328,
+    "max_drawdown": -2641.91,
+    "net_profit": -6408.219999999999,
+    "expectancy": -10.828,
+    "score": 20.39
+  },
+  "strategy_dna": {
+    "entry": "Weighted signal plus optimized filters",
+    "exit": "ATR SL/TP plus EMA20 exit",
+    "risk": "Dynamic",
+    "position_size": "Dynamic risk sizing",
+    "ai": "Pipeline approval score",
+    "indicators": "EMA, RSI, MACD, ATR, Volume",
+    "filters": "Production filters"
+  },
+  "changes": [
+    "Dynamic leverage",
+    "Dynamic sizing",
+    "ATR exit"
+  ],
+  "lessons": [
+    "AI score constant",
+    "Stop losses dominated",
+    "Performance below benchmark"
+  ]
+}

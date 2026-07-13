@@ -1,0 +1,6 @@
+symbol,passed,train_profit_factor,profit_factor,profit_factor_degradation,train_net_profit,net_profit,net_profit_degradation,train_win_rate,win_rate,win_rate_degradation,trades,max_drawdown,expectancy
+BNBUSDT,False,1.2306,0.9477,-0.2829,722.29,-52.24,-774.53,38.89,33.33,-5.56,27,-244.46,-1.93
+SOLUSDT,False,1.0413,0.9286,-0.1127,881.33,-487.46,-1368.79,36.94,33.33,-3.61,165,-1261.9,-2.95
+BTCUSDT,False,1.0115,0.8604,-0.1511,100.55,-486.74,-587.29,35.75,31.4,-4.35,86,-984.54,-5.66
+ETHUSDT,False,1.1508,0.8585,-0.2923,642.2,-210.65,-852.85,37.93,30.77,-7.16,39,-502.46,-5.4
+XRPUSDT,False,1.0151,0.6878,-0.3273,74.58,-502.34,-576.92,34.35,25.0,-9.35,40,-516.28,-12.56

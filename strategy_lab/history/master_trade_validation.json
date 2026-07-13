@@ -1,0 +1,55 @@
+{
+  "project_root": "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader",
+  "output_file": "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\history\\master_trade_history.csv",
+  "sources_discovered": 2,
+  "sources_loaded": 2,
+  "master_rows": 1099,
+  "global_duplicate_rows_removed": 0,
+  "versions": [
+    "v0.1.0",
+    "v0.1.1"
+  ],
+  "symbols": [
+    "BNBUSDT",
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "source_results": [
+    {
+      "strategy_version": "v0.1.0",
+      "source_file": "reports\\backtest_v0.1.0\\trade_journal.csv",
+      "rows_read": 581,
+      "rows_loaded": 581,
+      "duplicate_rows_removed": 0,
+      "missing_required_columns": [],
+      "status": "LOADED"
+    },
+    {
+      "strategy_version": "v0.1.1",
+      "source_file": "reports\\strategy_lab\\v0.1.1\\trade_journal.csv",
+      "rows_read": 518,
+      "rows_loaded": 518,
+      "duplicate_rows_removed": 0,
+      "missing_required_columns": [],
+      "status": "LOADED"
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "row_count": 1099,
+    "missing_columns": [],
+    "duplicate_trade_ids": 0,
+    "invalid_time_order": 0,
+    "null_required_fields": {
+      "symbol": 0,
+      "exit_time": 0,
+      "entry_price": 0,
+      "entry_time": 0,
+      "exit_price": 0,
+      "net_profit": 0
+    },
+    "source_gate_passed": true
+  }
+}

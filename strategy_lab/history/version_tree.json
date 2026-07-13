@@ -1,0 +1,28 @@
+{
+  "nodes": [
+    {
+      "version": "research_original",
+      "parent": "",
+      "goal": "Original optimized research benchmark",
+      "status": "BENCHMARK"
+    },
+    {
+      "version": "v0.1.0",
+      "parent": "research_original",
+      "goal": "Production-style pipeline baseline",
+      "status": "ARCHIVED"
+    },
+    {
+      "version": "v0.1.1",
+      "parent": "v0.1.0",
+      "goal": "Recover original research performance",
+      "status": "CANDIDATE"
+    },
+    {
+      "version": "v0.1.2",
+      "parent": "v0.1.1",
+      "goal": "Test market-regime gate only",
+      "status": "PLANNED"
+    }
+  ]
+}

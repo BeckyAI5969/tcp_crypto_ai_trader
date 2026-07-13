@@ -1,0 +1,37 @@
+{
+  "version": "v0.1.1",
+  "display_name": "v0.1.1",
+  "edition": "Research Recovery Edition",
+  "parent": "v0.1.0",
+  "status": "CANDIDATE",
+  "goal": "Recover original research performance",
+  "created_at_utc": "2026-07-13T08:37:37.923552+00:00",
+  "metrics": {
+    "trades": 518.0,
+    "win_rate": 70.65637065637065,
+    "profit_factor": 1.31374,
+    "max_drawdown": -448.89,
+    "net_profit": 1736.49,
+    "expectancy": 3.912,
+    "score": 77.92
+  },
+  "strategy_dna": {
+    "entry": "Original weighted score and filters",
+    "exit": "4% TP, -2% SL, EMA20 profit exit",
+    "risk": "Research parity",
+    "position_size": "Fixed notional 2,500",
+    "ai": "Original weighted score",
+    "indicators": "EMA, RSI, MACD, ATR, Volume",
+    "filters": "Original research filters"
+  },
+  "changes": [
+    "Restored research exits",
+    "Restored fixed sizing",
+    "No fees/slippage for parity"
+  ],
+  "lessons": [
+    "Positive edge recovered",
+    "Close to benchmark",
+    "SOL/BTC weaker"
+  ]
+}

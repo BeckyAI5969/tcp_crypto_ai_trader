@@ -1,0 +1,14 @@
+input,path,exists,size_bytes,status
+backtest_summary,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\reports\backtest_v0.1.0\backtest_summary.csv,True,617,AVAILABLE
+benchmark_comparison,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\reports\backtest_v0.1.0\benchmark_comparison.csv,True,1559,AVAILABLE
+trade_journal,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\reports\backtest_v0.1.0\trade_journal.csv,True,117698,AVAILABLE
+backtest_run,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\reports\backtest_v0.1.0\backtest_run.json,True,984,AVAILABLE
+portfolio_benchmark,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\portfolio_backtest_report.csv,True,1299,AVAILABLE
+walk_forward,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\walk_forward_report.csv,True,1114,AVAILABLE
+feature_importance,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\feature_importance.csv,True,589,AVAILABLE
+final_trade_analysis,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\final_trade_analysis.csv,True,11946,AVAILABLE
+portfolio_trade_log,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\portfolio_trade_log.csv,True,434,AVAILABLE
+optimization_v2_best,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\optimization_lab_v2_best.csv,True,5455,AVAILABLE
+optimization_v3_best,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\optimization_lab_v3_best.csv,True,2925,AVAILABLE
+optimization_v4_best,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\optimization_lab_v4_best.csv,True,12212,AVAILABLE
+optimization_v4_all,C:\Users\Buppha\OneDrive\buppha\tcp_crypto_ai_trader\research\optimization_lab_v4.csv,True,120203,AVAILABLE

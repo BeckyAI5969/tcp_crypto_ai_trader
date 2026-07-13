@@ -1,0 +1,11 @@
+version,symbol,rows_evaluated,best_profit_factor,best_net_profit,best_win_rate,best_max_drawdown,best_expectancy,min_score,take_profit_pct,stop_loss_pct,rsi_range,atr_mode,volume_multiplier,exit_mode
+v2,BNBUSDT,30,1.2774,1056.49,39.82,-796.26,9.35,60,0.04,-0.02,,,,
+v3,BNBUSDT,10,1.284,1145.9,29.29,-852.94,11.57,85,0.05,-0.015,"(35, 70)",,,
+v4,BNBUSDT,33,1.4444,873.04,76.03,-367.62,5.98,60,0.04,-0.02,"(30, 60)",sma20,1.1,ema20_exit
+v4,BNBUSDT,144,1.8619,562.35,81.82,-127.19,8.52,60,0.04,-0.02,"(30, 55)",sma20,1.15,ema20_exit
+v4,BTCUSDT,144,1.2028,140.47,80.65,-256.26,2.27,60,0.04,-0.02,"(30, 55)",percentile40,1.15,ema20_exit
+v3,ETHUSDT,4,1.3091,1533.84,30.77,-679.42,13.11,85,0.05,-0.015,"(35, 70)",,,
+v4,ETHUSDT,39,1.5405,910.77,76.03,-365.91,7.53,60,0.04,-0.02,"(30, 60)",sma20,1.1,ema20_exit
+v4,ETHUSDT,144,1.5405,910.77,76.03,-365.91,7.53,60,0.04,-0.02,"(30, 60)",sma20,1.1,ema20_exit
+v4,SOLUSDT,144,1.1652,428.58,68.49,-433.81,2.94,60,0.04,-0.02,"(30, 60)",percentile40,1.2,ema20_exit
+v4,XRPUSDT,144,1.6059,414.45,79.31,-260.06,7.15,60,0.04,-0.02,"(30, 55)",sma20,1.15,ema20_exit

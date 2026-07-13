@@ -1,0 +1,206 @@
+{
+  "generated_at_utc": "2026-07-13T16:02:54.409099+00:00",
+  "source": "strategy_lab/history/master_trade_history.csv",
+  "methodology": {
+    "scope": "Descriptive loss concentration and manifest reconciliation",
+    "causality_limit": "Findings identify measured associations in recorded trades. They do not prove hidden market, execution, or implementation causes without additional evidence.",
+    "confidence_rule": "HIGH >=30 trades; MEDIUM 10-29 trades; LOW <10 trades"
+  },
+  "trade_count": 1099,
+  "strategy_versions": [
+    "v0.1.0",
+    "v0.1.1"
+  ],
+  "versions": [
+    {
+      "strategy_version": "v0.1.0",
+      "calculated_metrics": {
+        "trades": 581,
+        "win_rate": 29.259896729776248,
+        "profit_factor": 0.6411232843041548,
+        "net_profit": -6408.22172037,
+        "expectancy": -11.029641515266782,
+        "max_drawdown": -7776.064533300003
+      },
+      "manifest_reconciliation": {
+        "trades": {
+          "reported": 581.0,
+          "calculated": 581,
+          "difference": 0.0
+        },
+        "win_rate": {
+          "reported": 29.259896729776248,
+          "calculated": 29.259896729776248,
+          "difference": 0.0
+        },
+        "profit_factor": {
+          "reported": 0.65328,
+          "calculated": 0.6411232843041548,
+          "difference": -0.0121567156958452
+        },
+        "net_profit": {
+          "reported": -6408.219999999999,
+          "calculated": -6408.22172037,
+          "difference": -0.0017203700008394662
+        },
+        "expectancy": {
+          "reported": -10.828,
+          "calculated": -11.029641515266782,
+          "difference": -0.20164151526678253
+        },
+        "max_drawdown": {
+          "reported": -2641.91,
+          "calculated": -7776.064533300003,
+          "difference": -5134.154533300003
+        }
+      },
+      "negative_pnl_total": -17856.33182678,
+      "finding_count": 6
+    },
+    {
+      "strategy_version": "v0.1.1",
+      "calculated_metrics": {
+        "trades": 518,
+        "win_rate": 70.65637065637065,
+        "profit_factor": 1.2284845236184212,
+        "net_profit": 1736.4823795000002,
+        "expectancy": 3.352282585907336,
+        "max_drawdown": -668.9595882000004
+      },
+      "manifest_reconciliation": {
+        "trades": {
+          "reported": 518.0,
+          "calculated": 518,
+          "difference": 0.0
+        },
+        "win_rate": {
+          "reported": 70.65637065637065,
+          "calculated": 70.65637065637065,
+          "difference": 0.0
+        },
+        "profit_factor": {
+          "reported": 1.31374,
+          "calculated": 1.2284845236184212,
+          "difference": -0.08525547638157871
+        },
+        "net_profit": {
+          "reported": 1736.49,
+          "calculated": 1736.4823795000002,
+          "difference": -0.007620499999802632
+        },
+        "expectancy": {
+          "reported": 3.912,
+          "calculated": 3.352282585907336,
+          "difference": -0.5597174140926637
+        },
+        "max_drawdown": {
+          "reported": -448.89,
+          "calculated": -668.9595882000004,
+          "difference": -220.06958820000045
+        }
+      },
+      "negative_pnl_total": -7600.0,
+      "finding_count": 1
+    }
+  ],
+  "findings": [
+    {
+      "priority": 1,
+      "strategy_version": "v0.1.1",
+      "category": "EXIT_REASON",
+      "dimension": "exit_reason",
+      "value": "STOP_LOSS",
+      "trades": 152,
+      "losses": 152,
+      "net_profit": -7600.0,
+      "loss_contribution_pct": 100.0,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for exit_reason=STOP_LOSS. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    },
+    {
+      "priority": 2,
+      "strategy_version": "v0.1.0",
+      "category": "EXIT_REASON",
+      "dimension": "exit_reason",
+      "value": "STOP_LOSS",
+      "trades": 344,
+      "losses": 344,
+      "net_profit": -17459.98406082,
+      "loss_contribution_pct": 97.78035169930267,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for exit_reason=STOP_LOSS. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    },
+    {
+      "priority": 3,
+      "strategy_version": "v0.1.0",
+      "category": "SYMBOL",
+      "dimension": "symbol",
+      "value": "SOLUSDT",
+      "trades": 195,
+      "losses": 143,
+      "net_profit": -2638.41026146,
+      "loss_contribution_pct": 14.775768545603803,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for symbol=SOLUSDT. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    },
+    {
+      "priority": 4,
+      "strategy_version": "v0.1.0",
+      "category": "SYMBOL",
+      "dimension": "symbol",
+      "value": "ETHUSDT",
+      "trades": 168,
+      "losses": 114,
+      "net_profit": -1436.59789605,
+      "loss_contribution_pct": 8.045313617522861,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for symbol=ETHUSDT. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    },
+    {
+      "priority": 5,
+      "strategy_version": "v0.1.0",
+      "category": "SYMBOL",
+      "dimension": "symbol",
+      "value": "BNBUSDT",
+      "trades": 76,
+      "losses": 57,
+      "net_profit": -1100.34847302,
+      "loss_contribution_pct": 6.162231323287544,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for symbol=BNBUSDT. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    },
+    {
+      "priority": 6,
+      "strategy_version": "v0.1.0",
+      "category": "SYMBOL",
+      "dimension": "symbol",
+      "value": "XRPUSDT",
+      "trades": 68,
+      "losses": 47,
+      "net_profit": -776.00483293,
+      "loss_contribution_pct": 4.34582444176014,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for symbol=XRPUSDT. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    },
+    {
+      "priority": 7,
+      "strategy_version": "v0.1.0",
+      "category": "SYMBOL",
+      "dimension": "symbol",
+      "value": "BTCUSDT",
+      "trades": 74,
+      "losses": 50,
+      "net_profit": -456.86025691000003,
+      "loss_contribution_pct": 2.5585336414101847,
+      "confidence": "HIGH",
+      "interpretation": "Observed negative P&L concentration for symbol=BTCUSDT. This is a measured association, not proof of an underlying causal mechanism.",
+      "evidence_scope": "master_trade_history.csv"
+    }
+  ]
+}

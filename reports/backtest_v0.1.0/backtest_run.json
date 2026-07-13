@@ -1,0 +1,31 @@
+{
+  "completed_at_utc": "2026-07-12T18:04:48.940727+00:00",
+  "project_version": "v0.1.0",
+  "dataset": "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\data\\market_dataset.csv",
+  "timeframe": "15m",
+  "lookback_days": 365,
+  "symbols": [
+    "BNBUSDT",
+    "XRPUSDT",
+    "ETHUSDT",
+    "BTCUSDT",
+    "SOLUSDT"
+  ],
+  "initial_balance_per_symbol": 5000.0,
+  "risk_per_trade": 0.01,
+  "taker_fee_rate_per_side": 0.0005,
+  "slippage_rate_per_fill": 0.0003,
+  "entry_signal": "original weighted SignalEngine + optimized symbol filters",
+  "execution_and_risk": "src/main_pipeline.py v0.1.0",
+  "exit": "v0.1.0 ATR SL/TP plus profitable EMA20 exit",
+  "future_columns_used_as_inputs": false,
+  "excluded_future_columns": [
+    "future_return_16",
+    "future_return_32",
+    "future_return_4",
+    "future_return_8",
+    "label_16"
+  ],
+  "intrabar_priority": "STOP_FIRST",
+  "entry_execution": "current completed candle close plus slippage"
+}

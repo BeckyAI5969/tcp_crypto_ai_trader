@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "module": "28.4",
+  "manifest_count": 4,
+  "versions": [
+    "research_original",
+    "v0.1.0",
+    "v0.1.1",
+    "v0.1.2"
+  ],
+  "unique_versions": true,
+  "parent_graph_valid": true,
+  "dashboard_reconciliation": {
+    "available": true,
+    "manifest_only_versions": [],
+    "dashboard_only_versions": [],
+    "consistent": true
+  },
+  "source_files": [
+    "strategy_lab\\strategies\\research_original\\manifest.json",
+    "strategy_lab\\strategies\\v0.1.0\\manifest.json",
+    "strategy_lab\\strategies\\v0.1.1\\manifest.json",
+    "strategy_lab\\strategies\\v0.1.2\\manifest.json"
+  ]
+}

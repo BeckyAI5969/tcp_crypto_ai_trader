@@ -1,0 +1,25 @@
+{
+  "version": "v0.1.2",
+  "display_name": "v0.1.2",
+  "edition": "Market Regime Edition",
+  "parent": "v0.1.1",
+  "status": "PLANNED",
+  "goal": "Test market-regime gate only",
+  "created_at_utc": "2026-07-13T08:37:37.927272+00:00",
+  "metrics": {
+    "score": 0
+  },
+  "strategy_dna": {
+    "entry": "v0.1.1 plus regime gate",
+    "exit": "Same as v0.1.1",
+    "risk": "Same as v0.1.1",
+    "position_size": "Same as v0.1.1",
+    "ai": "Same as v0.1.1",
+    "indicators": "Add Regime",
+    "filters": "Market regime only"
+  },
+  "changes": [
+    "Planned controlled change: market regime filter"
+  ],
+  "lessons": []
+}

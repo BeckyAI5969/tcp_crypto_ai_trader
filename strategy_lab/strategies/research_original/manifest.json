@@ -1,0 +1,32 @@
+{
+  "version": "research_original",
+  "display_name": "Research Original",
+  "edition": "Research Benchmark",
+  "parent": "",
+  "status": "BENCHMARK",
+  "goal": "Original optimized research benchmark",
+  "created_at_utc": "2026-07-13T08:37:37.908907+00:00",
+  "metrics": {
+    "profit_factor": 1.4753,
+    "win_rate": 77.26,
+    "max_drawdown": -288.65,
+    "net_profit": 491.32,
+    "score": 95.0
+  },
+  "strategy_dna": {
+    "entry": "Optimized weighted signal with symbol-specific filters",
+    "exit": "Fixed TP/SL plus EMA20 exit",
+    "risk": "Research fixed sizing",
+    "position_size": "Fixed notional",
+    "ai": "Weighted score",
+    "indicators": "EMA, RSI, MACD, ATR, Volume",
+    "filters": "Symbol-specific filters"
+  },
+  "changes": [
+    "Original benchmark"
+  ],
+  "lessons": [
+    "Strong in-sample result",
+    "Walk-forward robustness still required"
+  ]
+}

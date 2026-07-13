@@ -1,0 +1,5 @@
+﻿version,display_name,edition,parent,status,goal,profit_factor,win_rate,max_drawdown,net_profit,expectancy,trades,score
+research_original,Research Original,Research Benchmark,,BENCHMARK,Original optimized research benchmark,1.4753,77.26,-288.65,491.32,,,95.0
+v0.1.0,v0.1.0,Production Baseline,research_original,ARCHIVED,Production-style pipeline baseline,0.65328,29.259896729776248,-2641.91,-6408.219999999999,-10.828,581.0,20.39
+v0.1.1,v0.1.1,Research Recovery Edition,v0.1.0,CANDIDATE,Recover original research performance,1.31374,70.65637065637065,-448.89,1736.49,3.912,518.0,77.92
+v0.1.2,v0.1.2,Market Regime Edition,v0.1.1,PLANNED,Test market-regime gate only,,,,,,,0

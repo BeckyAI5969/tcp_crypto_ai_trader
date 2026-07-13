@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0.0",
+  "module": "28.4",
+  "strategy_count": 4,
+  "root_strategies": [
+    "research_original"
+  ],
+  "strategies": [
+    {
+      "version": "research_original",
+      "display_name": "Research Original",
+      "edition": "Research Benchmark",
+      "parent": "",
+      "status": "BENCHMARK",
+      "goal": "Original optimized research benchmark",
+      "created_at_utc": "2026-07-13T08:37:37.908907+00:00",
+      "metrics": {
+        "profit_factor": 1.4753,
+        "win_rate": 77.26,
+        "max_drawdown": -288.65,
+        "net_profit": 491.32,
+        "score": 95.0
+      },
+      "strategy_dna": {
+        "entry": "Optimized weighted signal with symbol-specific filters",
+        "exit": "Fixed TP/SL plus EMA20 exit",
+        "risk": "Research fixed sizing",
+        "position_size": "Fixed notional",
+        "ai": "Weighted score",
+        "indicators": "EMA, RSI, MACD, ATR, Volume",
+        "filters": "Symbol-specific filters"
+      },
+      "changes": [
+        "Original benchmark"
+      ],
+      "lessons": [
+        "Strong in-sample result",
+        "Walk-forward robustness still required"
+      ]
+    },
+    {
+      "version": "v0.1.0",
+      "display_name": "v0.1.0",
+      "edition": "Production Baseline",
+      "parent": "research_original",
+      "status": "ARCHIVED",
+      "goal": "Production-style pipeline baseline",
+      "created_at_utc": "2026-07-13T08:37:37.917051+00:00",
+      "metrics": {
+        "trades": 581.0,
+        "win_rate": 29.259896729776248,
+        "profit_factor": 0.65328,
+        "max_drawdown": -2641.91,
+        "net_profit": -6408.219999999999,
+        "expectancy": -10.828,
+        "score": 20.39
+      },
+      "strategy_dna": {
+        "entry": "Weighted signal plus optimized filters",
+        "exit": "ATR SL/TP plus EMA20 exit",
+        "risk": "Dynamic",
+        "position_size": "Dynamic risk sizing",
+        "ai": "Pipeline approval score",
+        "indicators": "EMA, RSI, MACD, ATR, Volume",
+        "filters": "Production filters"
+      },
+      "changes": [
+        "Dynamic leverage",
+        "Dynamic sizing",
+        "ATR exit"
+      ],
+      "lessons": [
+        "AI score constant",
+        "Stop losses dominated",
+        "Performance below benchmark"
+      ]
+    },
+    {
+      "version": "v0.1.1",
+      "display_name": "v0.1.1",
+      "edition": "Research Recovery Edition",
+      "parent": "v0.1.0",
+      "status": "CANDIDATE",
+      "goal": "Recover original research performance",
+      "created_at_utc": "2026-07-13T08:37:37.923552+00:00",
+      "metrics": {
+        "trades": 518.0,
+        "win_rate": 70.65637065637065,
+        "profit_factor": 1.31374,
+        "max_drawdown": -448.89,
+        "net_profit": 1736.49,
+        "expectancy": 3.912,
+        "score": 77.92
+      },
+      "strategy_dna": {
+        "entry": "Original weighted score and filters",
+        "exit": "4% TP, -2% SL, EMA20 profit exit",
+        "risk": "Research parity",
+        "position_size": "Fixed notional 2,500",
+        "ai": "Original weighted score",
+        "indicators": "EMA, RSI, MACD, ATR, Volume",
+        "filters": "Original research filters"
+      },
+      "changes": [
+        "Restored research exits",
+        "Restored fixed sizing",
+        "No fees/slippage for parity"
+      ],
+      "lessons": [
+        "Positive edge recovered",
+        "Close to benchmark",
+        "SOL/BTC weaker"
+      ]
+    },
+    {
+      "version": "v0.1.2",
+      "display_name": "v0.1.2",
+      "edition": "Market Regime Edition",
+      "parent": "v0.1.1",
+      "status": "PLANNED",
+      "goal": "Test market-regime gate only",
+      "created_at_utc": "2026-07-13T08:37:37.927272+00:00",
+      "metrics": {
+        "score": 0
+      },
+      "strategy_dna": {
+        "entry": "v0.1.1 plus regime gate",
+        "exit": "Same as v0.1.1",
+        "risk": "Same as v0.1.1",
+        "position_size": "Same as v0.1.1",
+        "ai": "Same as v0.1.1",
+        "indicators": "Add Regime",
+        "filters": "Market regime only"
+      },
+      "changes": [
+        "Planned controlled change: market regime filter"
+      ],
+      "lessons": []
+    }
+  ]
+}

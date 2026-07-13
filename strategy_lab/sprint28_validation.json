@@ -1,0 +1,77 @@
+{
+  "sprint": 28,
+  "status": "PASS",
+  "generated_at_utc": "2026-07-13T16:02:54.726880+00:00",
+  "project_root": "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader",
+  "completed_modules": [
+    "28.1",
+    "28.2",
+    "28.3",
+    "28.4"
+  ],
+  "required_outputs": [
+    "strategy_lab/history/master_trade_history.csv",
+    "strategy_lab/history/master_trade_validation.json",
+    "strategy_lab/dashboard/strategy_dashboard.html",
+    "strategy_lab/dashboard/strategy_dashboard.json",
+    "strategy_lab/analyzers/root_cause_summary/ROOT_CAUSE_SUMMARY.md",
+    "strategy_lab/analyzers/root_cause_summary/root_cause_summary.json",
+    "strategy_lab/analyzers/root_cause_summary/root_cause_findings.csv",
+    "strategy_lab/manifest/strategy_manifest.json",
+    "strategy_lab/manifest/strategy_manifest_validation.json"
+  ],
+  "module_results": [
+    {
+      "module": "28.1",
+      "command": [
+        "C:\\Users\\Buppha\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\database\\database_builder.py",
+        "--project-root",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader"
+      ],
+      "return_code": 0,
+      "stdout": "========================================================================\nTCP STRATEGY LAB � MODULE 28.1 MASTER TRADE DATABASE\n========================================================================\nSources discovered : 2\nSources loaded     : 2\nMaster rows        : 1099\nVersions           : v0.1.0, v0.1.1\nSymbols            : BNBUSDT, BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT\nValidation         : PASS\n\nCreated: C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\history\\master_trade_history.csv\nValidation report: C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\history\\master_trade_validation.json\n",
+      "stderr": "2026-07-13 23:02:52,447 INFO master_trade_database Master trade database built: rows=1099 sources=2 validation=True\n"
+    },
+    {
+      "module": "28.2",
+      "command": [
+        "C:\\Users\\Buppha\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\dashboard\\strategy_dashboard.py",
+        "--project-root",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader"
+      ],
+      "return_code": 0,
+      "stdout": "Dashboard HTML: C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\dashboard\\strategy_dashboard.html\nDashboard JSON: C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\dashboard\\strategy_dashboard.json\n",
+      "stderr": "2026-07-13 23:02:53,446 INFO __main__: Strategy dashboard generated: strategies=4 trades=1099 html=C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\dashboard\\strategy_dashboard.html json=C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\dashboard\\strategy_dashboard.json\n"
+    },
+    {
+      "module": "28.3",
+      "command": [
+        "C:\\Users\\Buppha\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\analyzers\\root_cause_summary.py",
+        "--project-root",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader"
+      ],
+      "return_code": 0,
+      "stdout": "Root cause summary PASS: trades=1099 findings=7\n",
+      "stderr": "2026-07-13 23:02:54,423 INFO __main__: Root cause summary generated: trades=1099 versions=2 findings=7 output=C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\analyzers\\root_cause_summary\n"
+    },
+    {
+      "module": "28.4",
+      "command": [
+        "C:\\Users\\Buppha\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\manifest\\strategy_manifest.py",
+        "--project-root",
+        "C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader"
+      ],
+      "return_code": 0,
+      "stdout": "Strategy manifest PASS: strategies=4\nManifest: C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\manifest\\strategy_manifest.json\nValidation: C:\\Users\\Buppha\\OneDrive\\buppha\\tcp_crypto_ai_trader\\strategy_lab\\manifest\\strategy_manifest_validation.json\n",
+      "stderr": "2026-07-13 23:02:54,710 INFO strategy_manifest: Strategy manifest built: strategies=4\n"
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "schema_version": "1.0",
+  "generated_at_utc": "2026-07-13T16:02:53.434860+00:00",
+  "source": {
+    "master_trade_rows": 1099,
+    "strategy_manifest_count": 4,
+    "trade_versions": [
+      "v0.1.0",
+      "v0.1.1"
+    ]
+  },
+  "strategies": [
+    {
+      "version": "research_original",
+      "display_name": "Research Original",
+      "edition": "Research Benchmark",
+      "parent": null,
+      "status": "BENCHMARK",
+      "goal": "Original optimized research benchmark",
+      "created_at_utc": "2026-07-13T08:37:37.908907+00:00",
+      "manifest_source": "strategy_lab\\strategies\\research_original\\manifest.json",
+      "reported_metrics": {
+        "profit_factor": 1.4753,
+        "win_rate": 77.26,
+        "max_drawdown": -288.65,
+        "net_profit": 491.32,
+        "score": 95.0
+      },
+      "calculated_metrics": null,
+      "metric_reconciliation": {},
+      "symbol_metrics": [],
+      "strategy_dna": {
+        "entry": "Optimized weighted signal with symbol-specific filters",
+        "exit": "Fixed TP/SL plus EMA20 exit",
+        "risk": "Research fixed sizing",
+        "position_size": "Fixed notional",
+        "ai": "Weighted score",
+        "indicators": "EMA, RSI, MACD, ATR, Volume",
+        "filters": "Symbol-specific filters"
+      },
+      "changes": [
+        "Original benchmark"
+      ],
+      "lessons": [
+        "Strong in-sample result",
+        "Walk-forward robustness still required"
+      ]
+    },
+    {
+      "version": "v0.1.0",
+      "display_name": "v0.1.0",
+      "edition": "Production Baseline",
+      "parent": "research_original",
+      "status": "ARCHIVED",
+      "goal": "Production-style pipeline baseline",
+      "created_at_utc": "2026-07-13T08:37:37.917051+00:00",
+      "manifest_source": "strategy_lab\\strategies\\v0.1.0\\manifest.json",
+      "reported_metrics": {
+        "trades": 581.0,
+        "win_rate": 29.259896729776248,
+        "profit_factor": 0.65328,
+        "max_drawdown": -2641.91,
+        "net_profit": -6408.219999999999,
+        "expectancy": -10.828,
+        "score": 20.39
+      },
+      "calculated_metrics": {
+        "trades": 581,
+        "wins": 170,
+        "losses": 411,
+        "win_rate": 29.259896729776248,
+        "gross_profit": 11448.11010641,
+        "gross_loss": -17856.33182678,
+        "profit_factor": 0.6411232843041548,
+        "net_profit": -6408.22172037,
+        "expectancy": -11.029641515266782,
+        "max_drawdown": -7776.064533300003
+      },
+      "metric_reconciliation": {
+        "trades": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": -0.0121567156958452,
+        "net_profit": -0.0017203700008394662,
+        "expectancy": -0.20164151526678253,
+        "max_drawdown": -5134.154533300003
+      },
+      "symbol_metrics": [
+        {
+          "symbol": "BNBUSDT",
+          "trades": 76,
+          "wins": 19,
+          "losses": 57,
+          "win_rate": 25.0,
+          "gross_profit": 1470.1313797700002,
+          "gross_loss": -2570.47985279,
+          "profit_factor": 0.5719287697097951,
+          "net_profit": -1100.3484730199998,
+          "expectancy": -14.478269381842102,
+          "max_drawdown": -1426.23304959
+        },
+        {
+          "symbol": "BTCUSDT",
+          "trades": 74,
+          "wins": 24,
+          "losses": 50,
+          "win_rate": 32.432432432432435,
+          "gross_profit": 1952.7305044299999,
+          "gross_loss": -2409.5907613400004,
+          "profit_factor": 0.8103992328324103,
+          "net_profit": -456.86025691000003,
+          "expectancy": -6.173787255540541,
+          "max_drawdown": -699.0179549999999
+        },
+        {
+          "symbol": "ETHUSDT",
+          "trades": 168,
+          "wins": 54,
+          "losses": 114,
+          "win_rate": 32.142857142857146,
+          "gross_profit": 3767.0626117300003,
+          "gross_loss": -5203.660507779999,
+          "profit_factor": 0.7239255147598236,
+          "net_profit": -1436.5978960500001,
+          "expectancy": -8.551177952678572,
+          "max_drawdown": -2199.03760239
+        },
+        {
+          "symbol": "SOLUSDT",
+          "trades": 195,
+          "wins": 52,
+          "losses": 143,
+          "win_rate": 26.666666666666668,
+          "gross_profit": 2898.4489137699998,
+          "gross_loss": -5536.85917523,
+          "profit_factor": 0.5234825055216613,
+          "net_profit": -2638.4102614599997,
+          "expectancy": -13.530309033128203,
+          "max_drawdown": -2638.4102614600006
+        },
+        {
+          "symbol": "XRPUSDT",
+          "trades": 68,
+          "wins": 21,
+          "losses": 47,
+          "win_rate": 30.88235294117647,
+          "gross_profit": 1359.73669671,
+          "gross_loss": -2135.7415296400004,
+          "profit_factor": 0.636657890404555,
+          "net_profit": -776.00483293,
+          "expectancy": -11.411835778382354,
+          "max_drawdown": -1488.8211082499997
+        }
+      ],
+      "strategy_dna": {
+        "entry": "Weighted signal plus optimized filters",
+        "exit": "ATR SL/TP plus EMA20 exit",
+        "risk": "Dynamic",
+        "position_size": "Dynamic risk sizing",
+        "ai": "Pipeline approval score",
+        "indicators": "EMA, RSI, MACD, ATR, Volume",
+        "filters": "Production filters"
+      },
+      "changes": [
+        "Dynamic leverage",
+        "Dynamic sizing",
+        "ATR exit"
+      ],
+      "lessons": [
+        "AI score constant",
+        "Stop losses dominated",
+        "Performance below benchmark"
+      ]
+    },
+    {
+      "version": "v0.1.1",
+      "display_name": "v0.1.1",
+      "edition": "Research Recovery Edition",
+      "parent": "v0.1.0",
+      "status": "CANDIDATE",
+      "goal": "Recover original research performance",
+      "created_at_utc": "2026-07-13T08:37:37.923552+00:00",
+      "manifest_source": "strategy_lab\\strategies\\v0.1.1\\manifest.json",
+      "reported_metrics": {
+        "trades": 518.0,
+        "win_rate": 70.65637065637065,
+        "profit_factor": 1.31374,
+        "max_drawdown": -448.89,
+        "net_profit": 1736.49,
+        "expectancy": 3.912,
+        "score": 77.92
+      },
+      "calculated_metrics": {
+        "trades": 518,
+        "wins": 366,
+        "losses": 152,
+        "win_rate": 70.65637065637065,
+        "gross_profit": 9336.482379500001,
+        "gross_loss": -7600.0,
+        "profit_factor": 1.2284845236184212,
+        "net_profit": 1736.4823795000002,
+        "expectancy": 3.352282585907336,
+        "max_drawdown": -668.9595882000004
+      },
+      "metric_reconciliation": {
+        "trades": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": -0.08525547638157871,
+        "net_profit": -0.007620499999802632,
+        "expectancy": -0.5597174140926637,
+        "max_drawdown": -220.06958820000045
+      },
+      "symbol_metrics": [
+        {
+          "symbol": "BNBUSDT",
+          "trades": 75,
+          "wins": 58,
+          "losses": 17,
+          "win_rate": 77.33333333333333,
+          "gross_profit": 1353.93201315,
+          "gross_loss": -850.0,
+          "profit_factor": 1.5928611919411766,
+          "net_profit": 503.93201315,
+          "expectancy": 6.719093508666666,
+          "max_drawdown": -171.21723475000005
+        },
+        {
+          "symbol": "BTCUSDT",
+          "trades": 70,
+          "wins": 54,
+          "losses": 16,
+          "win_rate": 77.14285714285715,
+          "gross_profit": 871.48658577,
+          "gross_loss": -800.0,
+          "profit_factor": 1.0893582322125,
+          "net_profit": 71.48658577000003,
+          "expectancy": 1.0212369395714291,
+          "max_drawdown": -271.25699677
+        },
+        {
+          "symbol": "ETHUSDT",
+          "trades": 141,
+          "wins": 97,
+          "losses": 44,
+          "win_rate": 68.79432624113475,
+          "gross_profit": 2887.9374716499997,
+          "gross_loss": -2200.0,
+          "profit_factor": 1.31269885075,
+          "net_profit": 687.93747165,
+          "expectancy": 4.878989160638298,
+          "max_drawdown": -412.28225857
+        },
+        {
+          "symbol": "SOLUSDT",
+          "trades": 169,
+          "wins": 109,
+          "losses": 60,
+          "win_rate": 64.49704142011834,
+          "gross_profit": 3057.11619147,
+          "gross_loss": -3000.0,
+          "profit_factor": 1.01903873049,
+          "net_profit": 57.11619146999999,
+          "expectancy": 0.33796562999999996,
+          "max_drawdown": -392.51331334
+        },
+        {
+          "symbol": "XRPUSDT",
+          "trades": 63,
+          "wins": 48,
+          "losses": 15,
+          "win_rate": 76.19047619047619,
+          "gross_profit": 1166.01011746,
+          "gross_loss": -750.0,
+          "profit_factor": 1.5546801566133333,
+          "net_profit": 416.0101174600001,
+          "expectancy": 6.603335197777779,
+          "max_drawdown": -318.07783742999993
+        }
+      ],
+      "strategy_dna": {
+        "entry": "Original weighted score and filters",
+        "exit": "4% TP, -2% SL, EMA20 profit exit",
+        "risk": "Research parity",
+        "position_size": "Fixed notional 2,500",
+        "ai": "Original weighted score",
+        "indicators": "EMA, RSI, MACD, ATR, Volume",
+        "filters": "Original research filters"
+      },
+      "changes": [
+        "Restored research exits",
+        "Restored fixed sizing",
+        "No fees/slippage for parity"
+      ],
+      "lessons": [
+        "Positive edge recovered",
+        "Close to benchmark",
+        "SOL/BTC weaker"
+      ]
+    },
+    {
+      "version": "v0.1.2",
+      "display_name": "v0.1.2",
+      "edition": "Market Regime Edition",
+      "parent": "v0.1.1",
+      "status": "PLANNED",
+      "goal": "Test market-regime gate only",
+      "created_at_utc": "2026-07-13T08:37:37.927272+00:00",
+      "manifest_source": "strategy_lab\\strategies\\v0.1.2\\manifest.json",
+      "reported_metrics": {
+        "score": 0
+      },
+      "calculated_metrics": null,
+      "metric_reconciliation": {},
+      "symbol_metrics": [],
+      "strategy_dna": {
+        "entry": "v0.1.1 plus regime gate",
+        "exit": "Same as v0.1.1",
+        "risk": "Same as v0.1.1",
+        "position_size": "Same as v0.1.1",
+        "ai": "Same as v0.1.1",
+        "indicators": "Add Regime",
+        "filters": "Market regime only"
+      },
+      "changes": [
+        "Planned controlled change: market regime filter"
+      ],
+      "lessons": []
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "module": "28.1",
+  "name": "Master Trade Database",
+  "version": "1.0.0",
+  "status": "READY",
+  "one_command": "py -B strategy_lab\\database\\database_builder.py",
+  "output": [
+    "strategy_lab/history/master_trade_history.csv",
+    "strategy_lab/history/master_trade_validation.json"
+  ],
+  "modifies_original_trade_journals": false
+}
